@@ -15,7 +15,6 @@ class UAnimMontage;
 class USoundBase;
 class AWeaponBase;
 
-DECLARE_MULTICAST_DELEGATE(FOnShoot)
 UCLASS(config=Game)
 class AFPSCharacter : public ACharacter
 {
@@ -48,15 +47,9 @@ class AFPSCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* SprintAction;
 
-	/** Sprint Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))	
-	class UInputAction* ShootAction;
-
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
-
-	UEnhancedInputComponent* EnhancedInputComponent;
 
 public:
 	AFPSCharacter();
@@ -64,14 +57,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 protected:
+
 	virtual void BeginPlay();
 
-	void InitalizeWeapon();
+	void BindInputMappingContext();
 
 public:
-	
-	FOnShoot OnShootBegin;
-	FOnShoot OnShootEnd;
+
+	int CurrentAmmo;
 
 	/** Bool for AnimBP to switch to another animation set */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
@@ -87,6 +80,9 @@ public:
 	bool bIsShooting;
 
 protected:
+
+	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
+
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
@@ -101,14 +97,6 @@ protected:
 	void StartSprint(const FInputActionValue& Value);
 	void StopSprint(const FInputActionValue& Value);
 
-	/** Called for shooting input */
-	void StartShoot(const FInputActionValue& Value);
-	void StopShoot(const FInputActionValue& Value);
-
-protected:
-	// APawn interface
-	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
-	// End of APawn interface
 
 public:
 	/** Returns FirstPersonCameraComponent subobject **/
@@ -120,5 +108,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
 	TSubclassOf<AWeaponBase> CurrentWeapon;
+	
+private:
+
+	void InitalizeWeapon();
 };
 

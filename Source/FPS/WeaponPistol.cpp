@@ -17,15 +17,10 @@ AWeaponPistol::AWeaponPistol()
 
 void AWeaponPistol::BeginPlay()
 {
-	Super::BeginPlay();
 }
 
 void AWeaponPistol::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
 }
 
-void AWeaponBase::Shoot()
-{
 
-}

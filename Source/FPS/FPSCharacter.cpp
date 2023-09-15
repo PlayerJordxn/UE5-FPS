@@ -37,10 +37,15 @@ void AFPSCharacter::Tick(float DeltaTime)
 
 void AFPSCharacter::BeginPlay()
 {
-	// Call the base class  
 	Super::BeginPlay();
 
-	//Add Input Mapping Context
+	BindInputMappingContext();
+
+	InitalizeWeapon();
+}
+
+void AFPSCharacter::BindInputMappingContext()
+{
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -48,8 +53,6 @@ void AFPSCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-
-	InitalizeWeapon();
 }
 
 void AFPSCharacter::InitalizeWeapon()
@@ -58,7 +61,7 @@ void AFPSCharacter::InitalizeWeapon()
 	{
 		AActor* WeaponActor = GetWorld()->SpawnActor(CurrentWeapon);
 		AWeaponBase* Weapon = Cast<AWeaponBase>(WeaponActor);
-		Weapon->AttachWeapon(this, WeaponActor);
+		Weapon->AttachWeapon(this, Weapon, WeaponActor);
 	}
 }
 
@@ -85,9 +88,6 @@ void AFPSCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 		//Sprinting
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AFPSCharacter::StartSprint);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopSprint);
-
-		//EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &AFPSCharacter::StartShoot);
-		//EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopShoot);
 	}
 }
 
@@ -141,18 +141,5 @@ void AFPSCharacter::StartSprint(const FInputActionValue& Value)
 void AFPSCharacter::StopSprint(const FInputActionValue& Value)
 {
 	bIsSprinting = false;
-}
-
-void AFPSCharacter::StartShoot(const FInputActionValue& Value)
-{
-	OnShootBegin.Broadcast();
-	UE_LOG(LogTemp, Warning, TEXT("Shoot Begin"));
-}
-
-void AFPSCharacter::StopShoot(const FInputActionValue& Value)
-{
-	OnShootEnd.Broadcast();
-	UE_LOG(LogTemp, Warning, TEXT("Shoot End"));
-
 }
 

@@ -7,11 +7,11 @@
 #include "WeaponBase.generated.h"
 
 UENUM()
-enum FireMode
+enum EWeaponType
 {
-	Auto = 0 UMETA(DisplayName = "Auto"),
-	Semi = 1 UMETA(DisplayName = "Semi"),
-	Bolt = 2 UMETA(DisplayName = "Bolt"),
+	Rifle = 0 UMETA(DisplayName = "Rifle"),
+	Pistol = 1 UMETA(DisplayName = "Pistol"),
+	Sniper = 2 UMETA(DisplayName = "Sniper"),
 };
 
 UCLASS()
@@ -23,16 +23,7 @@ public:
 	// Sets default values for this actor's properties
 	AWeaponBase();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	virtual void Shoot();
-
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = WeaponComponents)
 	USkeletalMeshComponent* Weapon;
@@ -44,11 +35,16 @@ public:
 	UStaticMeshComponent* BarrelMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = WeaponProperties)
-	TEnumAsByte<FireMode> WeaponFireMode;
+	TEnumAsByte<EWeaponType> WeaponType;
 
-	/* Shoot Type */
+	/* Fire Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = WeaponProperties)
-	class UInputTrigger* InputTrigger;
+	class UInputMappingContext* FireContext;
 
-	void AttachWeapon(class AFPSCharacter* Character, AActor* WeaponBP);
+	/* Fire Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = WeaponProperties)
+	class UInputAction* FireAction;
+
+	void AttachWeapon(class AFPSCharacter* Character, AWeaponBase* Weapon, AActor* WeaponActor);
+
 };
