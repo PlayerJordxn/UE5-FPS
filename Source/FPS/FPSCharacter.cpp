@@ -19,13 +19,12 @@ AFPSCharacter::AFPSCharacter()
 		
 	// Create a CameraComponent	
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FirstPersonCameraComponent->SetupAttachment(GetMesh(), TEXT("SOCKET_Camera"));
-	FirstPersonCameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 60.f)); // Position the camera
-	FirstPersonCameraComponent->bUsePawnControlRotation = true;
+	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
+	FirstPersonCameraComponent->bUsePawnControlRotation = false;
 
 	MeshPivot = CreateDefaultSubobject<USceneComponent>(TEXT("Mesh Pivot"));
 	MeshPivot->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
-	MeshPivot->SetupAttachment(GetCapsuleComponent());
+	MeshPivot->SetupAttachment(FirstPersonCameraComponent);
 	GetMesh()->SetupAttachment(MeshPivot);
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
 }
@@ -42,6 +41,8 @@ void AFPSCharacter::BeginPlay()
 	BindInputMappingContext();
 
 	InitalizeWeapon();
+
+	
 }
 
 void AFPSCharacter::BindInputMappingContext()
@@ -117,9 +118,9 @@ void AFPSCharacter::Look(const FInputActionValue& Value)
 	{
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
-		FRotator Rotation = MeshPivot->GetRelativeRotation();
+		FRotator Rotation = GetFirstPersonCameraComponent()->GetRelativeRotation();
 		FRotator RotationOffset = FRotator(FMath::Clamp(Rotation.Pitch + -LookAxisVector.Y, -90.f, 90.f), Rotation.Yaw, Rotation.Roll);
-		MeshPivot->SetRelativeRotationExact(RotationOffset);
+		GetFirstPersonCameraComponent()->SetRelativeRotationExact(RotationOffset);
 	}
 }
 

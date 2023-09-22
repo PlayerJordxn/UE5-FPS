@@ -16,8 +16,9 @@ AWeaponBase::AWeaponBase()
 
 void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AWeaponBase* CurrentWeapon, AActor* WeaponActor)
 {
+
 	if (Character == nullptr) return;
-	if (WeaponActor == nullptr) return;
+	if (Weapon == nullptr) return;
 
 	//Get player controller
 	APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
@@ -33,32 +34,46 @@ void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AWeaponBase* CurrentWea
 	//Add fire mapping context
 	SubSytem->AddMappingContext(FireContext, 1);
 
+	if (WeaponActor == nullptr) return;
 	//Attach weapon to character weapon socket
 	WeaponActor->AttachToComponent(
-		Character->GetMesh(), 
-		FAttachmentTransformRules::KeepRelativeTransform, 
+		Character->GetMesh(),
+		FAttachmentTransformRules::KeepRelativeTransform,
 		"SOCKET_Weapon");
 
+	//Disable collision
+	WeaponActor->SetActorEnableCollision(false);
 
-	switch (CurrentWeapon->WeaponType)
+	EFireMode WeaponFireMode = CurrentWeapon->FireMode;
+	switch (WeaponFireMode)
 	{
-		case Rifle:
+	case Auto:
 
-			break;
-		case Pistol:
-		
-			if (AWeaponPistol* Pistol = Cast<AWeaponPistol>(Weapon))
-			{
-				//EnhancedInputComponent->BindAction(Pistol->FireAction, ETriggerEvent::Started, Pistol, &AWeaponPistol::OnFire);
-			}
+		break;
+	case Semi:
 
-			break;
-		case Sniper:
+		if (AWeaponPistol* Pistol = Cast<AWeaponPistol>(CurrentWeapon))
+		{
+			EnhancedInputComponent->BindAction(Pistol->FireAction, ETriggerEvent::Started, Pistol, &AWeaponPistol::OnFire);
+			Pistol->OwnerCharacter = Character;
+		}
 
-			break;
-		default:
-			break;
+		break;
+	case Bolt:
+
+		break;
+	case Pump:
+
+		break;
+	default:
+		break;
 	}
+
 	
+}
+
+void AWeaponBase::StopFire()
+{
+	OwnerCharacter->bIsShooting = false;
 }
 

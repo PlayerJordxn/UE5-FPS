@@ -64,6 +64,7 @@ protected:
 
 public:
 
+
 	int CurrentAmmo;
 
 	/** Bool for AnimBP to switch to another animation set */
@@ -96,14 +97,14 @@ protected:
 	/** Called for sprinting input */
 	void StartSprint(const FInputActionValue& Value);
 	void StopSprint(const FInputActionValue& Value);
-
+	
 
 public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
 	/* Rotates the camera on the pitch */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh Components")
 	USceneComponent* MeshPivot;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
