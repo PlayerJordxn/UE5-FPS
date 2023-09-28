@@ -14,8 +14,9 @@ AWeaponBase::AWeaponBase()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AWeaponBase* CurrentWeapon, AActor* WeaponActor)
+void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AActor* WeaponToEquip, EWeaponType WeaponType)
 {
+	AWeaponBase* WeaponBase = Cast<AWeaponBase>(WeaponToEquip);
 
 	if (Character == nullptr) return;
 	if (Weapon == nullptr) return;
@@ -24,51 +25,46 @@ void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AWeaponBase* CurrentWea
 	APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
 	if (PlayerController == nullptr) return;
 
-	//Get subsytem
+	//Input subsytem
 	UEnhancedInputLocalPlayerSubsystem* SubSytem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 	if (SubSytem == nullptr) return;
 
+	//Add fire mapping context
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
 	if (EnhancedInputComponent == nullptr) return;
-
-	//Add fire mapping context
 	SubSytem->AddMappingContext(FireContext, 1);
 
-	if (WeaponActor == nullptr) return;
 	//Attach weapon to character weapon socket
-	WeaponActor->AttachToComponent(
+	if (WeaponToEquip == nullptr) return;
+	WeaponToEquip->AttachToComponent(
 		Character->GetMesh(),
 		FAttachmentTransformRules::KeepRelativeTransform,
 		"SOCKET_Weapon");
 
 	//Disable collision
-	WeaponActor->SetActorEnableCollision(false);
+	WeaponToEquip->SetActorEnableCollision(false);
 
-	EFireMode WeaponFireMode = CurrentWeapon->FireMode;
-	switch (WeaponFireMode)
+	//Check the weapon
+	switch (WeaponType)
 	{
-	case Auto:
+	case Rifle:
 
 		break;
-	case Semi:
+	case Pistol:
 
-		if (AWeaponPistol* Pistol = Cast<AWeaponPistol>(CurrentWeapon))
+		if (AWeaponPistol* Pistol = Cast<AWeaponPistol>(WeaponToEquip))
 		{
-			EnhancedInputComponent->BindAction(Pistol->FireAction, ETriggerEvent::Started, Pistol, &AWeaponPistol::OnFire);
-			Pistol->OwnerCharacter = Character;
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, Pistol, &AWeaponPistol::OnFire);
 		}
 
 		break;
-	case Bolt:
-
+	case Sniper:
 		break;
-	case Pump:
-
+	case Shotgun:
 		break;
 	default:
 		break;
 	}
-
 	
 }
 

@@ -11,8 +11,6 @@
 
 AFPSCharacter::AFPSCharacter()
 {
-	// Character doesnt have a rifle at start
-	bHasRifle = false;
 	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
@@ -31,7 +29,7 @@ AFPSCharacter::AFPSCharacter()
 
 void AFPSCharacter::Tick(float DeltaTime)
 {
-
+	Super::Tick(DeltaTime);
 }
 
 void AFPSCharacter::BeginPlay()
@@ -39,7 +37,6 @@ void AFPSCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	BindInputMappingContext();
-
 	InitalizeWeapon();
 
 	
@@ -61,8 +58,6 @@ void AFPSCharacter::InitalizeWeapon()
 	if (CurrentWeapon != nullptr)
 	{
 		AActor* WeaponActor = GetWorld()->SpawnActor(CurrentWeapon);
-		AWeaponBase* Weapon = Cast<AWeaponBase>(WeaponActor);
-		Weapon->AttachWeapon(this, Weapon, WeaponActor);
 	}
 }
 

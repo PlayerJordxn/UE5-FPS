@@ -3,6 +3,8 @@
 
 #include "WeaponPistol.h"
 #include "FPSCharacter.h"
+#include "Kismet/GameplayStatics.h"
+
 AWeaponPistol::AWeaponPistol()
 {
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
@@ -13,32 +15,43 @@ AWeaponPistol::AWeaponPistol()
 
 	BarrelMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Barrel Mesh"));
 	BarrelMesh->SetupAttachment(Weapon, "SOCKET_Default");
+
+	IronSightBackMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Iront Sight Back Mesh"));
+	IronSightBackMesh->SetupAttachment(Weapon, "SOCKET_Ironsights");
+
+	IronSightFrontMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Iront Sight Front Mesh"));
+	IronSightFrontMesh->SetupAttachment(ForestockMesh, "SOCKET_Ironsight_F");
 }
 
 void AWeaponPistol::BeginPlay()
 {
+	Super::BeginPlay();
+
+	APawn* CharacterPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	OwnerCharacter = Cast<AFPSCharacter>(CharacterPawn);
+	AttachWeapon(OwnerCharacter, this, FireMode);
 }
 
 void AWeaponPistol::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
 }
 
 void AWeaponPistol::OnFire()
 {	
-	UE_LOG(LogTemp, Warning, TEXT("Shot Fired"));
 	if (OwnerCharacter != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Shot Fired #2"));
-		UAnimInstance* OwnerAnim = OwnerCharacter->GetMesh()->GetAnimInstance();
-		if (OwnerAnim)
+		if (UAnimInstance* OwnerAnim = OwnerCharacter->GetMesh()->GetAnimInstance())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Shot Fired #3"));
-			OwnerAnim->Montage_Play(FireMontage, 1.0f);
-			OwnerCharacter->bIsShooting = true;
-			GetWorld()->GetTimerManager().SetTimer(FireRateHandle, this, &AWeaponPistol::StopFire, FireRate, false);
+			if (OwnerCharacter->IsShooting() == false)
+			{
+				OwnerAnim->Montage_Play(FireMontage, 1.0f);
+				OwnerCharacter->bIsShooting = true;
+				GetWorld()->GetTimerManager().SetTimer(FireRateHandle, this, &AWeaponBase::StopFire, WeaponData.FireRate, false);
+			}
+			
 		}
 	}
-	
 }
 
 

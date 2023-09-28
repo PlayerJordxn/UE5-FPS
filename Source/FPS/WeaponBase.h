@@ -23,14 +23,25 @@
 //	class UImage* WeaponIcon;
 //};
 
+USTRUCT(BlueprintType)
+struct FWeaponData
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AimRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float FireRate;
+};
 
 UENUM()
-enum EFireMode
+enum EWeaponType
 {
-	Auto UMETA(DisplayName = "Automatic"),
-	Semi UMETA(DisplayName = "Semi Automatic"),
-	Bolt UMETA(DisplayName = "Bolt Action"),
-	Pump UMETA(DisplayName = "PumpAction"),
+	Rifle UMETA(DisplayName = "Rifle"),
+	Pistol UMETA(DisplayName = "Pistol"),
+	Sniper UMETA(DisplayName = "Sniper"),
+	Shotgun UMETA(DisplayName = "Shotgun"),
 };
 
 UCLASS()
@@ -48,10 +59,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Input")
 	class UInputAction* FireAction;
 
+	/* Character Holding Weapon */
+	class AFPSCharacter* OwnerCharacter;
+
 	// Sets default values for this actor's properties
 	AWeaponBase();
 
 public:	
+
+	/* Mesh */
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
 	USkeletalMeshComponent* Weapon;
@@ -62,29 +78,33 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
 	UStaticMeshComponent* BarrelMesh;
 
-public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
+	UStaticMeshComponent* IronSightFrontMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
-	float FireRate;
+	UStaticMeshComponent* IronSightBackMesh;
 
+public:
+
+	/* Fire Handle */
 	FTimerHandle FireRateHandle;
 
-	class AFPSCharacter* OwnerCharacter;
+	/* Weapon Attachment*/
+	void AttachWeapon(class AFPSCharacter* Character, AActor* WeaponToEquip, EWeaponType WeaponType);
 
-	void AttachWeapon(class AFPSCharacter* Character, AWeaponBase* Weapon, AActor* WeaponActor);
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Animations")
+	TEnumAsByte<EWeaponType> FireMode;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
-	UDataAsset* GripData;
+	void OnFire();
+	void StopFire();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
-	TEnumAsByte<EFireMode> FireMode;
+protected:
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Animations")
 	UAnimMontage* FireMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
-	UAnimMontage* FireAimMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Animations")
+	UAnimMontage* UnholsterMontage;
 
-	void StopFire();
 
 };

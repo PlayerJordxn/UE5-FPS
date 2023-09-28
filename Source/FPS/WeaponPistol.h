@@ -6,9 +6,7 @@
 #include "WeaponBase.h"
 #include "WeaponPistol.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class FPS_API AWeaponPistol : public AWeaponBase
 {
@@ -28,4 +26,6 @@ public:
 
 	void OnFire();
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
+	FWeaponData WeaponData;
 };

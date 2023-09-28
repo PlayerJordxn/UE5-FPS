@@ -8,6 +8,7 @@
 void UFPSAnimInstance::NativeInitializeAnimation()
 {
 	FPSCharacter = Cast<AFPSCharacter>(TryGetPawnOwner());
+
 }
 
 void UFPSAnimInstance::UpdateAnimationProperties(float DeltaTime)

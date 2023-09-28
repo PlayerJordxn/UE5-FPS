@@ -62,14 +62,14 @@ protected:
 
 	void BindInputMappingContext();
 
+	/* Rotates the camera on the pitch */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh Components")
+	USceneComponent* MeshPivot;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
+	TSubclassOf<AWeaponBase> CurrentWeapon;
+
 public:
-
-
-	int CurrentAmmo;
-
-	/** Bool for AnimBP to switch to another animation set */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
-	bool bHasRifle;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	bool bIsAiming;
@@ -100,15 +100,12 @@ protected:
 	
 
 public:
+
 	/** Returns FirstPersonCameraComponent subobject **/
-	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
-
-	/* Rotates the camera on the pitch */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh Components")
-	USceneComponent* MeshPivot;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
-	TSubclassOf<AWeaponBase> CurrentWeapon;
+	FORCEINLINE UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+	FORCEINLINE bool IsShooting() const { return bIsShooting; }
+	FORCEINLINE bool IsAiming() const { return bIsAiming; }
+	FORCEINLINE bool IsSprinting() const { return bIsSprinting; }
 	
 private:
 
