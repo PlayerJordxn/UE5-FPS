@@ -14,9 +14,9 @@ AWeaponBase::AWeaponBase()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AActor* WeaponToEquip, EWeaponType WeaponType)
+void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon)
 {
-	AWeaponBase* WeaponBase = Cast<AWeaponBase>(WeaponToEquip);
+	AWeaponBase* WeaponBase = Cast<AWeaponBase>(CurrentWeaponActor);
 
 	if (Character == nullptr) return;
 	if (Weapon == nullptr) return;
@@ -35,14 +35,29 @@ void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AActor* WeaponToEquip, 
 	SubSytem->AddMappingContext(FireContext, 1);
 
 	//Attach weapon to character weapon socket
-	if (WeaponToEquip == nullptr) return;
-	WeaponToEquip->AttachToComponent(
+	if (CurrentWeaponActor == nullptr) return;
+	CurrentWeaponActor->AttachToComponent(
 		Character->GetMesh(),
 		FAttachmentTransformRules::KeepRelativeTransform,
 		"SOCKET_Weapon");
 
 	//Disable collision
-	WeaponToEquip->SetActorEnableCollision(false);
+	CurrentWeaponActor->SetActorEnableCollision(false);
+
+	//Binds Fire Function
+	BindWeaponInput(CurrentWeaponActor, EnhancedInputComponent);
+
+	//Play unholster montage (arm + weapon)
+	if (ArmsUnholsterMontage && WeaponUnholsterMontage)
+	{
+		Character->GetMesh()->GetAnimInstance()->Montage_Play(ArmsUnholsterMontage, 1.0f);
+		Weapon->GetAnimInstance()->Montage_Play(WeaponUnholsterMontage, 1.0f);
+	}
+	
+}
+
+void AWeaponBase::BindWeaponInput(AActor* CurrentWeaponActor, UEnhancedInputComponent* EnhancedInputComponent)
+{
 
 	//Check the weapon
 	switch (WeaponType)
@@ -52,7 +67,7 @@ void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AActor* WeaponToEquip, 
 		break;
 	case Pistol:
 
-		if (AWeaponPistol* Pistol = Cast<AWeaponPistol>(WeaponToEquip))
+		if (AWeaponPistol* Pistol = Cast<AWeaponPistol>(CurrentWeaponActor))
 		{
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, Pistol, &AWeaponPistol::OnFire);
 		}
@@ -65,11 +80,5 @@ void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AActor* WeaponToEquip, 
 	default:
 		break;
 	}
-	
-}
-
-void AWeaponBase::StopFire()
-{
-	OwnerCharacter->bIsShooting = false;
 }
 

@@ -4,6 +4,7 @@
 #include "WeaponPistol.h"
 #include "FPSCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "Animation/AnimInstance.h"
 
 AWeaponPistol::AWeaponPistol()
 {
@@ -21,15 +22,18 @@ AWeaponPistol::AWeaponPistol()
 
 	IronSightFrontMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Iront Sight Front Mesh"));
 	IronSightFrontMesh->SetupAttachment(ForestockMesh, "SOCKET_Ironsight_F");
+
+	MuzzleFlashSocket = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle Flash Socket"));
+	MuzzleFlashSocket->SetupAttachment(BarrelMesh, "SOCKET_Muzzle");
+	
 }
 
 void AWeaponPistol::BeginPlay()
 {
 	Super::BeginPlay();
-
-	APawn* CharacterPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-	OwnerCharacter = Cast<AFPSCharacter>(CharacterPawn);
-	AttachWeapon(OwnerCharacter, this, FireMode);
+	
+	OwnerCharacter = Cast<AFPSCharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
+	AttachWeapon(OwnerCharacter, this, this);
 }
 
 void AWeaponPistol::Tick(float DeltaTime)
@@ -39,19 +43,47 @@ void AWeaponPistol::Tick(float DeltaTime)
 
 void AWeaponPistol::OnFire()
 {	
-	if (OwnerCharacter != nullptr)
+	if (OwnerCharacter == nullptr) return;
+	if (OwnerCharacter->IsShooting()) return;
+
+	OwnerCharacter->bIsShooting = true;
+	GetWorld()->GetTimerManager().SetTimer(FireRateHandle, this, &AWeaponPistol::EndFire, GetFireRate(), false);
+
+	if (ArmsFireMontage != nullptr)
 	{
-		if (UAnimInstance* OwnerAnim = OwnerCharacter->GetMesh()->GetAnimInstance())
-		{
-			if (OwnerCharacter->IsShooting() == false)
-			{
-				OwnerAnim->Montage_Play(FireMontage, 1.0f);
-				OwnerCharacter->bIsShooting = true;
-				GetWorld()->GetTimerManager().SetTimer(FireRateHandle, this, &AWeaponBase::StopFire, WeaponData.FireRate, false);
-			}
-			
-		}
+		UAnimInstance* OwnerAnim = OwnerCharacter->GetMesh()->GetAnimInstance();
+		OwnerAnim->Montage_Play(ArmsFireMontage, 1.0f);
 	}
+
+	if (WeaponFireMontage != nullptr)
+	{
+		Weapon->GetAnimInstance()->Montage_Play(WeaponFireMontage, 1.0f);
+	}
+
+	if (FireSound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), FireSound, GetActorLocation());
+	}
+
+	if (MuzzleFlash != nullptr)
+	{
+		FName EmitterName = "Muzzle Flash";
+		FVector Location = BarrelMesh->GetRelativeLocation();
+		FRotator Rotation = MuzzleFlashSocket->GetRelativeRotation();
+		FVector Scale = FVector(0.2f, 0.2f, 0.2f);
+		UGameplayStatics::SpawnEmitterAttached(
+			MuzzleFlash, 
+			MuzzleFlashSocket, 
+			EmitterName,
+			Location, Rotation,
+			Scale);
+	}
+	
+}
+
+void AWeaponPistol::EndFire()
+{
+	OwnerCharacter->bIsShooting = false;
 }
 
 

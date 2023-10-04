@@ -60,7 +60,7 @@ protected:
 
 	virtual void BeginPlay();
 
-	void BindInputMappingContext();
+public:
 
 	/* Rotates the camera on the pitch */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh Components")
@@ -69,8 +69,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
 	TSubclassOf<AWeaponBase> CurrentWeapon;
 
-public:
-
+	/* Character properties*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	bool bIsAiming;
 
@@ -79,6 +78,16 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	bool bIsShooting;
+	
+	/* Determines what input should be binded */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Properties")
+	bool bEnableMovement;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Properties")
+	bool bEnableJumping;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Properties")
+	bool bEnableSprinting;
 
 protected:
 

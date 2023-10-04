@@ -25,7 +25,6 @@ public:
 	virtual void Tick(float DeltaTime) override;	
 
 	void OnFire();
+	void EndFire();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
-	FWeaponData WeaponData;
 };

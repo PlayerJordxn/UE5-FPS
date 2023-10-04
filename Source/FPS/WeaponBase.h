@@ -86,25 +86,47 @@ public:
 
 public:
 
-	/* Fire Handle */
-	FTimerHandle FireRateHandle;
+	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+	FORCEINLINE float GetFireRate() const { return FireRate; }
 
-	/* Weapon Attachment*/
-	void AttachWeapon(class AFPSCharacter* Character, AActor* WeaponToEquip, EWeaponType WeaponType);
+	void AttachWeapon(class AFPSCharacter* Character, AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon);
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Animations")
-	TEnumAsByte<EWeaponType> FireMode;
+	void BindWeaponInput(AActor* CurrentWeaponActor, class UEnhancedInputComponent* EnhancedInputComponent);
 
-	void OnFire();
-	void StopFire();
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
+	TEnumAsByte<EWeaponType> WeaponType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
+	float FireRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
+	class USoundBase* FireSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Particles")
+	class UParticleSystem* MuzzleFlash;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	USceneComponent* MuzzleFlashSocket;
 
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Animations")
-	UAnimMontage* FireMontage;
+	UAnimMontage* ArmsFireMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Animations")
-	UAnimMontage* UnholsterMontage;
+	UAnimMontage* WeaponFireMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Animations")
+	UAnimMontage* ArmsUnholsterMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Animations")
+	UAnimMontage* WeaponUnholsterMontage;
+
+	TSubclassOf<AActor*> BulletCase;
+
+	TArray<AActor*> BulletPool;
+
+	/* Fire Handle */
+	FTimerHandle FireRateHandle;
 
 };
