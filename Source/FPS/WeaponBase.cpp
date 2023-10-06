@@ -5,9 +5,7 @@
 #include "FPSCharacter.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "FPSCharacter.h"
-#include "Camera/CameraComponent.h"
+#include "WeaponPistol.h"
 
 // Sets default values
 AWeaponBase::AWeaponBase()
@@ -16,10 +14,10 @@ AWeaponBase::AWeaponBase()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-
 void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon)
 {
-	OwnerCharacter = Character;
+	AWeaponBase* WeaponBase = Cast<AWeaponBase>(CurrentWeaponActor);
+
 	if (Character == nullptr) return;
 	if (Weapon == nullptr) return;
 
@@ -47,7 +45,7 @@ void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AActor* CurrentWeaponAc
 	CurrentWeaponActor->SetActorEnableCollision(false);
 
 	//Binds Fire Function
-	BindWeaponInput(CurrentWeapon, CurrentWeaponActor, EnhancedInputComponent);
+	BindWeaponInput(CurrentWeaponActor, EnhancedInputComponent);
 
 	//Play unholster montage (arm + weapon)
 	if (ArmsUnholsterMontage && WeaponUnholsterMontage)
@@ -58,86 +56,29 @@ void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AActor* CurrentWeaponAc
 	
 }
 
-void AWeaponBase::BindWeaponInput(AWeaponBase* CurrentWeapon, AActor* CurrentWeaponActor, UEnhancedInputComponent* EnhancedInputComponent)
+void AWeaponBase::BindWeaponInput(AActor* CurrentWeaponActor, UEnhancedInputComponent* EnhancedInputComponent)
 {
-	//Check the weapon fire mode
-	UE_LOG(LogTemp, Warning, TEXT("Set Input Begin"));
-	switch (CurrentWeapon->FireMode)
+
+	//Check the weapon
+	switch (WeaponType)
 	{
-	case Semi:
-		EnhancedInputComponent->BindAction(CurrentWeapon->FireAction, ETriggerEvent::Started, CurrentWeapon, &AWeaponBase::OnFireSemiAutomatic);
-		UE_LOG(LogTemp, Warning, TEXT("Set Input Semi"));
+	case Rifle:
 
 		break;
-	case Auto:
-		EnhancedInputComponent->BindAction(CurrentWeapon->FireAction, ETriggerEvent::Triggered, CurrentWeapon, &AWeaponBase::OnFireAutomatic);
+	case Pistol:
+
+		if (AWeaponPistol* Pistol = Cast<AWeaponPistol>(CurrentWeaponActor))
+		{
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, Pistol, &AWeaponPistol::OnFire);
+		}
+
 		break;
-	case Bolt:
-		EnhancedInputComponent->BindAction(CurrentWeapon->FireAction, ETriggerEvent::Triggered, CurrentWeapon, &AWeaponBase::OnFireAutomatic);
+	case Sniper:
 		break;
-	case Pump:
-		EnhancedInputComponent->BindAction(CurrentWeapon->FireAction, ETriggerEvent::Triggered, CurrentWeapon, &AWeaponBase::OnFireAutomatic);
+	case Shotgun:
 		break;
 	default:
 		break;
 	}
-}
-
-void AWeaponBase::OnFireSemiAutomatic()
-{
-	if (OwnerCharacter == nullptr) return;
-	if (OwnerCharacter->IsShooting()) return;
-
-	OwnerCharacter->bIsShooting = true;
-	GetWorld()->GetTimerManager().SetTimer(FireRateHandle, this, &AWeaponPistol::EndFire, GetFireRate(), false);
-
-	FHitResult OutHit;
-	FVector CameraLocation;
-	FRotator CameraRotation;
-	OwnerCharacter->GetController()->GetPlayerViewPoint(CameraLocation, CameraRotation);
-	bool RayHit = GetWorld()->LineTraceSingleByChannel(OutHit, CameraLocation, CameraLocation + CameraRotation.Vector() * 7000, ECC_Visibility);
-	if (RayHit)
-	{
-		DrawDebugPoint(GetWorld(), OutHit.Location, 15.f, FColor::Blue, true);
-	}
-
-	if (ArmsFireMontage != nullptr)
-	{
-		UAnimInstance* OwnerAnim = OwnerCharacter->GetMesh()->GetAnimInstance();
-		OwnerAnim->Montage_Play(ArmsFireMontage);
-	}
-
-	if (WeaponFireMontage != nullptr)
-	{
-		Weapon->GetAnimInstance()->Montage_Play(WeaponFireMontage);
-	}
-
-	if (FireSound != nullptr)
-	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), FireSound, GetActorLocation());
-	}
-
-	if (MuzzleFlash != nullptr)
-	{
-		FName EmitterName = "Muzzle Flash";
-		FVector Location = BarrelMesh->GetRelativeLocation();
-		FRotator Rotation = MuzzleFlashSocket->GetRelativeRotation();
-		FVector Scale = FVector(0.2f, 0.2f, 0.2f);
-		UGameplayStatics::SpawnEmitterAttached(
-			MuzzleFlash,
-			MuzzleFlashSocket,
-			EmitterName,
-			Location, Rotation,
-			Scale);
-	}
-}
-
-void AWeaponBase::OnFireAutomatic()
-{
-}
-
-void AWeaponBase::EndFire()
-{
-	OwnerCharacter->bIsShooting = false;
 }
 

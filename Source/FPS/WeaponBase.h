@@ -7,21 +7,21 @@
 #include "WeaponBase.generated.h"
 
 
-/* Weapon user interface */
-USTRUCT()
-struct FWeaponTextData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere)
-	FText Name;
-
-	UPROPERTY(EditAnywhere)
-	FText CurrentAmmo;
-
-	UPROPERTY(EditAnywhere)
-	class UImage* WeaponIcon;
-};
+///* Weapon user interface */
+//USTRUCT()
+//struct FWeaponTextData
+//{
+//	GENERATED_BODY()
+//
+//	UPROPERTY(EditAnywhere)
+//	FText Name;
+//
+//	UPROPERTY(EditAnywhere)
+//	FText CurrentAmmo;
+//
+//	UPROPERTY(EditAnywhere)
+//	class UImage* WeaponIcon;
+//};
 
 USTRUCT(BlueprintType)
 struct FWeaponData
@@ -36,12 +36,12 @@ struct FWeaponData
 };
 
 UENUM()
-enum EFireMode
+enum EWeaponType
 {
-	Semi UMETA(DisplayName = "Semi Automatic"),
-	Auto UMETA(DisplayName = "Automatic"),
-	Pump UMETA(DisplayName = "Pump Action"),
-	Bolt UMETA(DisplayName = "Bolt Action"),
+	Rifle UMETA(DisplayName = "Rifle"),
+	Pistol UMETA(DisplayName = "Pistol"),
+	Sniper UMETA(DisplayName = "Sniper"),
+	Shotgun UMETA(DisplayName = "Shotgun"),
 };
 
 UCLASS()
@@ -66,7 +66,6 @@ public:
 	AWeaponBase();
 
 public:	
-	
 
 	/* Mesh */
 
@@ -87,19 +86,15 @@ public:
 
 public:
 
-	FORCEINLINE EFireMode GetWeaponType() const { return FireMode; }
+	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 	FORCEINLINE float GetFireRate() const { return FireRate; }
 
 	void AttachWeapon(class AFPSCharacter* Character, AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon);
-	void BindWeaponInput(AWeaponBase* CurrentWeapon, AActor* CurrentWeaponActor, class UEnhancedInputComponent* EnhancedInputComponent);
-	
-	void OnFireSemiAutomatic();
-	void OnFireAutomatic();
 
-	void EndFire();
+	void BindWeaponInput(AActor* CurrentWeaponActor, class UEnhancedInputComponent* EnhancedInputComponent);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
-	TEnumAsByte<EFireMode> FireMode;
+	TEnumAsByte<EWeaponType> WeaponType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
 	float FireRate;

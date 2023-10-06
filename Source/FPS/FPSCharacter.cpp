@@ -36,14 +36,6 @@ void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitalizeInput();
-	InitalizeWeapon();
-
-	
-}
-
-void AFPSCharacter::InitalizeInput()
-{
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -72,28 +64,22 @@ void AFPSCharacter::InitalizeInput()
 			}
 		}
 	}
+
+	
+	
+
+	InitalizeWeapon();
+
+	
 }
+
 
 void AFPSCharacter::InitalizeWeapon()
 {
 	if (CurrentWeapon != nullptr)
 	{
 		AActor* WeaponActor = GetWorld()->SpawnActor(CurrentWeapon);
-		if (AWeaponBase* Weapon = Cast<AWeaponBase>(WeaponActor))
-		{
-			Weapon->AttachWeapon(this, WeaponActor, Weapon);
-		}
-
 	}
-}
-
-void AFPSCharacter::DisablePlayerInput()
-{
-
-}
-
-void AFPSCharacter::EnablePlayerInput()
-{
 }
 
 void AFPSCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)

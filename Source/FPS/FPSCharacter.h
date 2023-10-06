@@ -60,15 +60,13 @@ protected:
 
 	virtual void BeginPlay();
 
-	void InitalizeInput();
-
 public:
 
 	/* Rotates the camera on the pitch */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh Components")
 	USceneComponent* MeshPivot;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
 	TSubclassOf<AWeaponBase> CurrentWeapon;
 
 	/* Character properties*/
@@ -121,12 +119,5 @@ public:
 private:
 
 	void InitalizeWeapon();
-
-	UFUNCTION(BlueprintCallable)
-	void DisablePlayerInput();
-
-	UFUNCTION(BlueprintCallable)
-	void EnablePlayerInput();
-
 };
 
