@@ -4,16 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "WeaponBase.h"
-#include "WeaponPistol.generated.h"
+#include "WeaponRifle.generated.h"
 
-
+/**
+ * 
+ */
 UCLASS()
-class FPS_API AWeaponPistol : public AWeaponBase
+class FPS_API AWeaponRifle : public AWeaponBase
 {
 	GENERATED_BODY()
 
 public:
 
-	AWeaponPistol();
+	AWeaponRifle();
 
 };
