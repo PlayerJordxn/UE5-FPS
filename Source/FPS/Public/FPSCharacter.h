@@ -67,7 +67,10 @@ public:
 	USceneComponent* MeshPivot;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
-	TSubclassOf<AWeaponBase> CurrentWeapon;
+	TSubclassOf<AWeaponBase> WeaponSelection;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+	AWeaponBase* CurrentWeapon; 
 
 	/* Character properties*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
@@ -80,13 +83,13 @@ public:
 	bool bIsShooting;
 	
 	/* Determines what input should be binded */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Input")
 	bool bEnableMovement;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Input")
 	bool bEnableJumping;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Input")
 	bool bEnableSprinting;
 
 protected:

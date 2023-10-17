@@ -25,19 +25,14 @@ public:
 public:
 	
 	class AFPSCharacter* FPSCharacter;
-	
-	UFUNCTION(BlueprintCallable)
-	AFPSCharacter* GetFPSCharacter() const { return FPSCharacter; }
 
 	float ForwardVelocityNormalized;
-	
+
 	float RightVelocityNormalized;
 
 	UFUNCTION(BlueprintCallable)
-	float GetCharacterForwardVelocityNormalized() { return ForwardVelocityNormalized; }
+	AFPSCharacter* GetFPSCharacter() const { return FPSCharacter; }
 
-	UFUNCTION(BlueprintCallable)
-	float GetCharacterRightVelocityNormalized() { return ForwardVelocityNormalized; }
 
 protected:
 
@@ -63,4 +58,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
 	bool bIsShooting;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+		class UGripDataAsset* GripData;
+
+
 };

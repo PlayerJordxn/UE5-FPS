@@ -16,15 +16,4 @@ public:
 
 	AWeaponPistol();
 
-protected:
-
-	virtual void BeginPlay() override;
-
-public:
-
-	virtual void Tick(float DeltaTime) override;	
-
-	void OnFire();
-	void EndFire();
-
 };

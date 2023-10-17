@@ -4,44 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "FireModeEnum.h"
 #include "WeaponBase.generated.h"
 
-
-///* Weapon user interface */
-//USTRUCT()
-//struct FWeaponTextData
-//{
-//	GENERATED_BODY()
-//
-//	UPROPERTY(EditAnywhere)
-//	FText Name;
-//
-//	UPROPERTY(EditAnywhere)
-//	FText CurrentAmmo;
-//
-//	UPROPERTY(EditAnywhere)
-//	class UImage* WeaponIcon;
-//};
-
-USTRUCT(BlueprintType)
-struct FWeaponData
-{
-	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float AimRate;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float FireRate;
-};
-
 UENUM()
-enum EWeaponType
+enum EFireMode
 {
-	Rifle UMETA(DisplayName = "Rifle"),
-	Pistol UMETA(DisplayName = "Pistol"),
-	Sniper UMETA(DisplayName = "Sniper"),
-	Shotgun UMETA(DisplayName = "Shotgun"),
+	Semi UMETA(DisplayName = "Semi Automatic"),
+	Auto UMETA(DisplayName = "Automatic")
+
 };
 
 UCLASS()
@@ -65,6 +36,8 @@ public:
 	// Sets default values for this actor's properties
 	AWeaponBase();
 
+
+
 public:	
 
 	/* Mesh */
@@ -84,49 +57,65 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
 	UStaticMeshComponent* IronSightBackMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
+	UStaticMeshComponent* MagazineMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
+	UStaticMeshComponent* GripMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	USceneComponent* MuzzleFlashSocket;
+
+	void OnFirePressed();
+	void OnFireRelased();
+
 public:
 
-	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
-	FORCEINLINE float GetFireRate() const { return FireRate; }
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Statistics")
+	TEnumAsByte<EFireMode> FireMode;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Statistics")
+	class UGripDataAsset* GripData;
+
+	EFireMode GetFireMode() const { return FireMode; }
+	float GetFireRate() const { return .02f; }
+	float GetClassicPoseValue() const { return 0.f; }
+	float GetAimRate() const { return .2f; }
+
+	UFUNCTION()
 	void AttachWeapon(class AFPSCharacter* Character, AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon);
 
-	void BindWeaponInput(AActor* CurrentWeaponActor, class UEnhancedInputComponent* EnhancedInputComponent);
+	UFUNCTION()
+	void BindWeaponInput(AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon, class UEnhancedInputComponent* EnhancedInputComponent);
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
-	TEnumAsByte<EWeaponType> WeaponType;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
-	float FireRate;
-
+	/* Visuals */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
 	class USoundBase* FireSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Particles")
 	class UParticleSystem* MuzzleFlash;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	USceneComponent* MuzzleFlashSocket;
+	/* Animation */
 
-protected:
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Animations")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
 	UAnimMontage* ArmsFireMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Animations")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
+	UAnimMontage* ArmsAimFireMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
 	UAnimMontage* WeaponFireMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Animations")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
 	UAnimMontage* ArmsUnholsterMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Animations")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
 	UAnimMontage* WeaponUnholsterMontage;
-
-	TSubclassOf<AActor*> BulletCase;
-
-	TArray<AActor*> BulletPool;
 
 	/* Fire Handle */
 	FTimerHandle FireRateHandle;
+
+
+	
 
 };

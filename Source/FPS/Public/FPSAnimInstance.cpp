@@ -4,23 +4,22 @@
 #include "FPSAnimInstance.h"
 #include "FPSCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
+#include "WeaponBase.h"
 void UFPSAnimInstance::NativeInitializeAnimation()
 {
+	Super::NativeInitializeAnimation();
 	FPSCharacter = Cast<AFPSCharacter>(TryGetPawnOwner());
-
 }
 
 void UFPSAnimInstance::UpdateAnimationProperties(float DeltaTime)
 {
-	const AFPSCharacter* Character = GetFPSCharacter();
 
-	if (Character != nullptr)
+	if (GetFPSCharacter() != nullptr)
 	{
 		//Set Forward + Right Velocity Normalized
-		FVector Forward = Character->GetActorForwardVector();
-		FVector Right = Character->GetActorRightVector();
-		FVector VelocityNormalized = Character->GetVelocity().GetSafeNormal();
+		FVector Forward = GetFPSCharacter()->GetActorForwardVector();
+		FVector Right = GetFPSCharacter()->GetActorRightVector();
+		FVector VelocityNormalized = GetFPSCharacter()->GetVelocity().GetSafeNormal();
 
 		//Set Normlaized Normailzed
 		ForwardVelocityNormalized = FVector::DotProduct(Forward, VelocityNormalized);
@@ -31,9 +30,20 @@ void UFPSAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		RightVelocityLerpValue = FMath::Lerp(RightVelocityLerpValue, RightVelocityNormalized, DeltaTime * VelocityLerpSpeed);
 
 		//Set Character Properties
-		bIsInAir = Character->GetCharacterMovement()->IsFalling();
-		bIsAiming = Character->bIsAiming;
-		bIsSprinting = Character->bIsSprinting;
-		bIsShooting = Character->bIsShooting;
+		bIsInAir = GetFPSCharacter()->GetCharacterMovement()->IsFalling();
+		bIsAiming = GetFPSCharacter()->bIsAiming;
+		bIsSprinting = GetFPSCharacter()->bIsSprinting;
+		bIsShooting = GetFPSCharacter()->bIsShooting;
+
+		if (FPSCharacter->CurrentWeapon != nullptr)
+		{
+			if (FPSCharacter->CurrentWeapon->GripData != nullptr)
+			{
+				if (GripData == nullptr)
+				{
+					GripData = FPSCharacter->CurrentWeapon->GripData;
+				}
+			}
+		}
 	}
 }

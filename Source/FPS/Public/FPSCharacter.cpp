@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "FPSCharacter.h"
-#include "FPSProjectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -76,9 +75,14 @@ void AFPSCharacter::BeginPlay()
 
 void AFPSCharacter::InitalizeWeapon()
 {
-	if (CurrentWeapon != nullptr)
+	if (WeaponSelection != nullptr)
 	{
-		AActor* WeaponActor = GetWorld()->SpawnActor(CurrentWeapon);
+		AActor* WeaponActor = GetWorld()->SpawnActor(WeaponSelection);
+		CurrentWeapon = Cast<AWeaponBase>(WeaponActor);
+		if (CurrentWeapon != nullptr)
+		{
+			CurrentWeapon->AttachWeapon(this, WeaponActor, CurrentWeapon);
+		}
 	}
 }
 
