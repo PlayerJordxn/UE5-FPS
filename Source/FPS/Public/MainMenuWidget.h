@@ -15,6 +15,8 @@ class FPS_API UMainMenuWidget : public UUserWidget
 	GENERATED_BODY()
 
 
-	//class UButton* PlayButton;
+	class UButton* PlayButton;
+
+	class UProgressBar* temp;
 	
 };
