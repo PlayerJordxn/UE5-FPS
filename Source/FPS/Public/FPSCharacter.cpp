@@ -82,6 +82,7 @@ void AFPSCharacter::InitalizeWeapon()
 		if (CurrentWeapon != nullptr)
 		{
 			CurrentWeapon->AttachWeapon(this, WeaponActor, CurrentWeapon);
+			CurrentWeapon->Weapon->bOwnerNoSee = true;
 		}
 	}
 }

@@ -55,6 +55,8 @@ void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AActor* CurrentWeaponAc
 	{
 		CurrentWeapon->Weapon->GetAnimInstance()->Montage_Play(WeaponUnholsterMontage, 1.0f);
 	}
+
+	
 }
 
 void AWeaponBase::BindWeaponInput(AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon, UEnhancedInputComponent* EnhancedInputComponent)
