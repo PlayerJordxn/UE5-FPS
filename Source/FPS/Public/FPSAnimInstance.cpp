@@ -35,8 +35,12 @@ void UFPSAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		bIsSprinting = GetFPSCharacter()->bIsSprinting;
 		bIsShooting = GetFPSCharacter()->bIsShooting;
 
+
 		if (FPSCharacter->CurrentWeapon != nullptr)
 		{
+			WeaponSwayRotation = GetFPSCharacter()->CurrentWeapon->WeaponSwayRotation;
+			CurrentWeaponSwayRotation = GetFPSCharacter()->CurrentWeapon->CurrentWeaponSwayRotation;
+
 			if (FPSCharacter->CurrentWeapon->GripData != nullptr)
 			{
 				if (GripData == nullptr)

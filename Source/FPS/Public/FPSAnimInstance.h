@@ -47,6 +47,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Movement)
 	float VelocityLerpSpeed = 5.0f;
 
+	//Player Conditions
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
 	bool bIsInAir;
 
@@ -59,8 +60,16 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
 	bool bIsShooting;
 
+	//Weapon Sway
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
-		class UGripDataAsset* GripData;
+	FRotator CurrentWeaponSwayRotation;
+
+	//Weapon Sway
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	FRotator WeaponSwayRotation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	class UGripDataAsset* GripData;
 
 
 };

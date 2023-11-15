@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "WeaponBase.h"
+#include "GameFramework/SpringArmComponent.h"
 
 AFPSCharacter::AFPSCharacter()
 {
@@ -22,6 +23,7 @@ AFPSCharacter::AFPSCharacter()
 	MeshPivot = CreateDefaultSubobject<USceneComponent>(TEXT("Mesh Pivot"));
 	MeshPivot->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
 	MeshPivot->SetupAttachment(FirstPersonCameraComponent);
+
 	GetMesh()->SetupAttachment(MeshPivot);
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
 }
@@ -60,16 +62,19 @@ void AFPSCharacter::BeginPlay()
 					EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AFPSCharacter::StartSprint);
 					EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopSprint);
 				}
+
+				if (bEnableCrouching)
+				{
+					EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AFPSCharacter::StartCrouch);
+					EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopCrouch);
+				}
+
+				//Leaning
 			}
 		}
 	}
 
-	
-	
-
-	InitalizeWeapon();
-
-	
+	InitalizeWeapon();	
 }
 
 
@@ -82,7 +87,6 @@ void AFPSCharacter::InitalizeWeapon()
 		if (CurrentWeapon != nullptr)
 		{
 			CurrentWeapon->AttachWeapon(this, WeaponActor, CurrentWeapon);
-			CurrentWeapon->Weapon->bOwnerNoSee = true;
 		}
 	}
 }
@@ -150,5 +154,15 @@ void AFPSCharacter::StartSprint(const FInputActionValue& Value)
 void AFPSCharacter::StopSprint(const FInputActionValue& Value)
 {
 	bIsSprinting = false;
+}
+
+void AFPSCharacter::StartCrouch(const FInputActionValue& Value)
+{
+	OnStartCrouch();
+}
+
+void AFPSCharacter::StopCrouch(const FInputActionValue& Value)
+{
+	OnStopCrouch();
 }
 

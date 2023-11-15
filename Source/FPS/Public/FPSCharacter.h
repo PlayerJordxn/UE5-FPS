@@ -51,6 +51,10 @@ class AFPSCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
+	/** Crouch Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* CrouchAction;
+
 public:
 	AFPSCharacter();
 
@@ -63,7 +67,7 @@ protected:
 public:
 
 	/* Rotates the camera on the pitch */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	USceneComponent* MeshPivot;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
@@ -92,6 +96,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Input")
 	bool bEnableSprinting;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Input")
+	bool bEnableCrouching;
+
 protected:
 
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
@@ -110,7 +117,21 @@ protected:
 	void StartSprint(const FInputActionValue& Value);
 	void StopSprint(const FInputActionValue& Value);
 	
+	/** Called for sprinting input */
+	void StartCrouch(const FInputActionValue& Value);
+	void StopCrouch(const FInputActionValue& Value);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnStartCrouch();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnStopCrouch();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnStartJump();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnStopJump();
 public:
 
 	/** Returns FirstPersonCameraComponent subobject **/

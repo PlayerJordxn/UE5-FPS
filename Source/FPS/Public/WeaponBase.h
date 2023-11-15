@@ -7,6 +7,8 @@
 #include "FireModeEnum.h"
 #include "WeaponBase.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnShootSignature)
+
 UENUM()
 enum EFireMode
 {
@@ -41,9 +43,8 @@ public:
 public:	
 
 	/* Mesh */
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
-	USkeletalMeshComponent* Weapon;
+	USkeletalMeshComponent* WeaponBody;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
 	UStaticMeshComponent* ForestockMesh;
@@ -63,32 +64,64 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
 	UStaticMeshComponent* GripMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	USceneComponent* MuzzleFlashSocket;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
+	UStaticMeshComponent* MuzzleMesh;
 
-	void OnFirePressed();
-	void OnFireRelased();
+
 
 public:
+
+	UPROPERTY(EditAnywhere)
+	bool bHasMuzzle;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FRotator WeaponSwayRotation;
+
+	//Weapon Sway
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	FRotator CurrentWeaponSwayRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Statistics")
 	TEnumAsByte<EFireMode> FireMode;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Statistics")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Data")
 	class UGripDataAsset* GripData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Data")
+	class UDataAsset* MuzzleData;
+
+	FOnShootSignature OnShoot;
 
 	EFireMode GetFireMode() const { return FireMode; }
 	float GetFireRate() const { return .02f; }
 	float GetClassicPoseValue() const { return 0.f; }
 	float GetAimRate() const { return .2f; }
 
+
 	UFUNCTION()
 	void AttachWeapon(class AFPSCharacter* Character, AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon);
 
-	UFUNCTION()
-	void BindWeaponInput(AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon, class UEnhancedInputComponent* EnhancedInputComponent);
+	void SetupWeaponAttachment(AActor* CurrentWeaponActor, AFPSCharacter* Character);
 
+	UFUNCTION()
+	void SetupWeaponInput(AFPSCharacter* Character, AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon);
+	
+	UFUNCTION()
+	void SetupWeaponVFX(AWeaponBase* CurrentWeapon);
+
+	UFUNCTION()
+	void SetupWeaponAnimations(UWorld* const& World, AFPSCharacter* Character, AWeaponBase* CurrentWeapon);
+
+	UFUNCTION()
+	void OnFirePressed();
+
+	UFUNCTION()
+	void OnFireRelased();
+
+	UFUNCTION()
+	void SetDesiredWeaponRotation();
 	/* Visuals */
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
 	class USoundBase* FireSound;
 
@@ -114,8 +147,19 @@ public:
 
 	/* Fire Handle */
 	FTimerHandle FireRateHandle;
+	FTimerHandle WeaponSwayHandle;
 
 
-	
+private:
 
+	/* Fire Actions */
+
+	UFUNCTION()
+	void PlayWeaponSFX();
+
+	UFUNCTION()
+	void PlayFireMontages();
+
+	UFUNCTION()
+	void SpawnMuzzleFlash();
 };

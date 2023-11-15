@@ -5,17 +5,17 @@
 
 AWeaponRifle::AWeaponRifle()
 {
-	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
-	Weapon->SetupAttachment(RootComponent);
+	WeaponBody = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
+	WeaponBody->SetupAttachment(RootComponent);
 
 	ForestockMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Forestock Mesh"));
-	ForestockMesh->SetupAttachment(Weapon, "SOCKET_Forestock");
+	ForestockMesh->SetupAttachment(WeaponBody, "SOCKET_Forestock");
 
 	IronSightBackMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Iront Sight Back Mesh"));
-	IronSightBackMesh->SetupAttachment(Weapon, "SOCKET_Scope");
+	IronSightBackMesh->SetupAttachment(WeaponBody, "SOCKET_Scope");
 
 	MagazineMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Magazine Mesh"));
-	MagazineMesh->SetupAttachment(Weapon, "SOCKET_Magazine");
+	MagazineMesh->SetupAttachment(WeaponBody, "SOCKET_Magazine");
 
 	IronSightFrontMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Iront Sight Front Mesh"));
 	IronSightFrontMesh->SetupAttachment(ForestockMesh, "SOCKET_Ironsight_F");
