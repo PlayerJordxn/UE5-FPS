@@ -35,7 +35,7 @@ void AWeaponBase::OnFirePressed()
 	bool RayHit = World->LineTraceSingleByChannel(OutHit, CameraLocation, CameraLocation + CameraRotation.Vector() * 100000, ECC_Visibility);
 	if (RayHit)
 	{
-		DrawDebugSphere(World, OutHit.Location, 15.f, 16, FColor::Blue, true);
+		//DrawDebugSphere(World, OutHit.Location, 15.f, 16, FColor::Blue, true);
 	}
 
 	OnShoot.Broadcast();
@@ -49,9 +49,10 @@ void AWeaponBase::OnFireRelased()
 
 void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon)
 {
+	UWorld* const World = GetWorld();
+
 	OwnerCharacter = Character;
 	OwnerCharacter->CurrentWeapon = CurrentWeapon;
-	UWorld* const World = GetWorld();
 
 	if (CurrentWeaponActor == nullptr) return;
 	if (OwnerCharacter == nullptr) return;
@@ -63,9 +64,11 @@ void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AActor* CurrentWeaponAc
 	SetupWeaponInput(OwnerCharacter, CurrentWeaponActor, CurrentWeapon);
 	SetupWeaponVFX(CurrentWeapon);
 	SetupWeaponAnimations(World, OwnerCharacter, CurrentWeapon);
+	PlayWeaponUnholsterMontage(Character, CurrentWeapon);
+}
 
-	World->GetTimerManager().SetTimer(FireRateHandle, this, &AWeaponBase::SetDesiredWeaponRotation, 0.2f, true);
-
+void AWeaponBase::PlayWeaponUnholsterMontage(AFPSCharacter* Character, AWeaponBase* CurrentWeapon)
+{
 	//Play unholster montage (arm + weapon)
 	if (ArmsUnholsterMontage != nullptr)
 	{
@@ -132,13 +135,6 @@ void AWeaponBase::PlayWeaponSFX()
 	{
 		UGameplayStatics::PlaySoundAtLocation(World, FireSound, GetActorLocation());
 	}
-}
-
-void AWeaponBase::SetDesiredWeaponRotation()
-{
-	float WeaponSwayX = OwnerCharacter->GetControlRotation().Yaw;
-	float WeaponSwayY = OwnerCharacter->GetFirstPersonCameraComponent()->GetRelativeRotation().Pitch;
-	WeaponSwayRotation = FRotator(WeaponSwayX, WeaponSwayY, 0);
 }
 
 void AWeaponBase::PlayFireMontages()

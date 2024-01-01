@@ -22,4 +22,13 @@ AWeaponRifle::AWeaponRifle()
 
 	GripMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Grip Mesh"));
 	GripMesh->SetupAttachment(ForestockMesh, "SOCKET_Grip");
+
+	MuzzleMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Muzzle Mesh"));
+	MuzzleMesh->SetupAttachment(ForestockMesh, "SOCKET_Muzzle");
+
+	LaserBodyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Laser Body Mesh"));
+	LaserBodyMesh->SetupAttachment(ForestockMesh, "SOCKET_Laser");
+
+	LaserBeamMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Laser Beam Mesh"));
+	LaserBeamMesh->SetupAttachment(LaserBodyMesh, "SOCKET_Laser");
 }

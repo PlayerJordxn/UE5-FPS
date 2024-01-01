@@ -60,16 +60,4 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
 	bool bIsShooting;
 
-	//Weapon Sway
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
-	FRotator CurrentWeaponSwayRotation;
-
-	//Weapon Sway
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
-	FRotator WeaponSwayRotation;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
-	class UGripDataAsset* GripData;
-
-
 };

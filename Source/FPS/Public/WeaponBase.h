@@ -38,8 +38,6 @@ public:
 	// Sets default values for this actor's properties
 	AWeaponBase();
 
-
-
 public:	
 
 	/* Mesh */
@@ -67,19 +65,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
 	UStaticMeshComponent* MuzzleMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
+	UStaticMeshComponent* LaserBodyMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
+	UStaticMeshComponent* LaserBeamMesh;
 
 public:
 
 	UPROPERTY(EditAnywhere)
 	bool bHasMuzzle;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FRotator WeaponSwayRotation;
-
-	//Weapon Sway
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
-	FRotator CurrentWeaponSwayRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Statistics")
 	TEnumAsByte<EFireMode> FireMode;
@@ -101,6 +96,8 @@ public:
 	UFUNCTION()
 	void AttachWeapon(class AFPSCharacter* Character, AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon);
 
+	void PlayWeaponUnholsterMontage(AFPSCharacter* Character, AWeaponBase* CurrentWeapon);
+
 	void SetupWeaponAttachment(AActor* CurrentWeaponActor, AFPSCharacter* Character);
 
 	UFUNCTION()
@@ -118,8 +115,6 @@ public:
 	UFUNCTION()
 	void OnFireRelased();
 
-	UFUNCTION()
-	void SetDesiredWeaponRotation();
 	/* Visuals */
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
