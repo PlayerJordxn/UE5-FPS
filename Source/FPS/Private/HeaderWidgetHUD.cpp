@@ -3,34 +3,29 @@
 
 #include "HeaderWidgetHUD.h"
 #include "Components/Button.h"
+#include "Components/HorizontalBox.h"
 
 void UHeaderWidgetHUD::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	PlayButton->OnClicked.AddUniqueDynamic(this, &UHeaderWidgetHUD::OnPlayButtonClicked);
-	InventoryButton->OnClicked.AddUniqueDynamic(this, &UHeaderWidgetHUD::OnInventoryButtonClicked);
-	AnalyticsButton->OnClicked.AddUniqueDynamic(this, &UHeaderWidgetHUD::OnAnalyticsButtonClicked);
-	SettingsButton->OnClicked.AddUniqueDynamic(this, &UHeaderWidgetHUD::OnSettingsButtonClicked);
+	//PlayButton->OnClicked.AddDynamic(this, &UHeaderWidgetHUD::OnClickedEvent);
+	//PlayButton->OnHovered.AddDynamic(this, &UHeaderWidgetHUD::OnHoveredEvent);
+	//PlayButton->OnUnhovered.AddDynamic(this, &UHeaderWidgetHUD::OnUnhoveredEvent);
+
 }
 
-void UHeaderWidgetHUD::OnPlayButtonClicked()
+void UHeaderWidgetHUD::OnClickedEvent()
 {
-	OnButtonClickedDelegate.Broadcast((uint32)EMainMenuHUD::Play);
+	//OnButtonClickedDelegate.Broadcast(PlayButton);
 }
 
-void UHeaderWidgetHUD::OnInventoryButtonClicked()
+void UHeaderWidgetHUD::OnHoveredEvent()
 {
-	OnButtonClickedDelegate.Broadcast((uint32)EMainMenuHUD::Inventory);
+	//OnButtonHoveredDelegate.Broadcast(PlayButton);
 }
 
-void UHeaderWidgetHUD::OnAnalyticsButtonClicked()
+void UHeaderWidgetHUD::OnUnhoveredEvent()
 {
-	OnButtonClickedDelegate.Broadcast((uint32)EMainMenuHUD::Analytics);
+	//OnButtonUnhoveredDelegate.Broadcast(PlayButton);
 }
-
-void UHeaderWidgetHUD::OnSettingsButtonClicked()
-{
-	OnButtonClickedDelegate.Broadcast((uint32)EMainMenuHUD::Settings);
-}
-

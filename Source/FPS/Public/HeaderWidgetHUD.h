@@ -4,23 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Delegates/Delegate.h"
 #include "HeaderWidgetHUD.generated.h"
-
-/**
- * 
- */
 
 class UTextBlock;
 class UButton;
-
- DECLARE_MULTICAST_DELEGATE_OneParam(FOnButtonClickedSignature, uint8)
- DECLARE_MULTICAST_DELEGATE_OneParam(FOnButtonHoveredSignature, UButton*)
- DECLARE_MULTICAST_DELEGATE_FiveParams(FOnButtonUnhoveredSignature,
- 	UButton*		/*Button Hovered*/, 
- 	UTextBlock*		/*Button Title*/,
-    UTextBlock*		/*Button Description*/,
- 	float			/*Scale*/,
- 	FColor			/*Button Color*/)
 
 UCLASS()
 class FPS_API UHeaderWidgetHUD : public UUserWidget
@@ -29,23 +17,18 @@ class FPS_API UHeaderWidgetHUD : public UUserWidget
 
 protected:
 
-    void NativeConstruct() override;
+    virtual void NativeConstruct() override;
 
 public:
 
-    UButton* PlayButton;
-    UButton* InventoryButton;
-    UButton* AnalyticsButton;
-    UButton* SettingsButton;
+	//TArray<>
 
-    void OnPlayButtonClicked();
-    void OnInventoryButtonClicked();
-    void OnAnalyticsButtonClicked();
-    void OnSettingsButtonClicked();
+    void OnClickedEvent();
+    void OnHoveredEvent();
+    void OnUnhoveredEvent();
 
-    FOnButtonClickedSignature OnButtonClickedDelegate;
-    FOnButtonHoveredSignature OnButtonHoveredDelegate;
-    FOnButtonUnhoveredSignature OnButtonUnhoveredDelegate;
+
+
 };
 
  UENUM(BlueprintType)
