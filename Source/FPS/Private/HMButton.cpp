@@ -8,12 +8,12 @@ void UHMButton::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	/*if (MainButton)
+	if (MainButton)
 	{
 		MainButton->OnClicked.AddDynamic(this, &UHMButton::OnClickedNotify);
 		MainButton->OnHovered.AddDynamic(this, &UHMButton::OnHoveredNotify);
 		MainButton->OnUnhovered.AddDynamic(this, &UHMButton::OnUnhoveredNotify);
-	}*/
+	}
 }
 
 void UHMButton::OnClickedNotify()

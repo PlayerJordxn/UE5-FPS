@@ -17,55 +17,6 @@ AWeaponBase::AWeaponBase()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-void AWeaponBase::OnFirePressed()
-{
-	if (OwnerCharacter == nullptr) return;
-	if (OwnerCharacter->IsShooting()) return;
-
-	/* Fire Rate */
-	UWorld* const World = GetWorld();
-	OwnerCharacter->bIsShooting = true;
-	World->GetTimerManager().SetTimer(FireRateHandle, this, &AWeaponBase::OnFireRelased, GetFireRate());
-
-	/* Shoot */
-	FHitResult OutHit;
-	FVector CameraLocation;
-	FRotator CameraRotation;
-	OwnerCharacter->GetController()->GetPlayerViewPoint(CameraLocation, CameraRotation);
-	bool RayHit = World->LineTraceSingleByChannel(OutHit, CameraLocation, CameraLocation + CameraRotation.Vector() * 100000, ECC_Visibility);
-	if (RayHit)
-	{
-		//DrawDebugSphere(World, OutHit.Location, 15.f, 16, FColor::Blue, true);
-	}
-
-	OnShoot.Broadcast();
-}
-
-/* End Firing Weapon */
-void AWeaponBase::OnFireRelased()
-{
-	OwnerCharacter->bIsShooting = false;
-}
-
-void AWeaponBase::AttachWeapon(AFPSCharacter* Character, AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon)
-{
-	UWorld* const World = GetWorld();
-
-	OwnerCharacter = Character;
-	OwnerCharacter->CurrentWeapon = CurrentWeapon;
-
-	if (CurrentWeaponActor == nullptr) return;
-	if (OwnerCharacter == nullptr) return;
-	if (CurrentWeaponActor == nullptr) return;
-	if (CurrentWeapon == nullptr) return;
-	if (World == nullptr) return;
-
-	SetupWeaponAttachment(CurrentWeaponActor, Character);
-	SetupWeaponInput(OwnerCharacter, CurrentWeaponActor, CurrentWeapon);
-	SetupWeaponVFX(CurrentWeapon);
-	SetupWeaponAnimations(World, OwnerCharacter, CurrentWeapon);
-	PlayWeaponUnholsterMontage(Character, CurrentWeapon);
-}
 
 void AWeaponBase::PlayWeaponUnholsterMontage(AFPSCharacter* Character, AWeaponBase* CurrentWeapon)
 {
@@ -81,7 +32,7 @@ void AWeaponBase::PlayWeaponUnholsterMontage(AFPSCharacter* Character, AWeaponBa
 	}
 }
 
-void AWeaponBase::SetupWeaponAttachment(AActor* CurrentWeaponActor, AFPSCharacter* Character)
+void AWeaponBase::SetupWeaponAttachment(AFPSCharacter* Character, AActor* CurrentWeaponActor)
 {
 	CurrentWeaponActor->AttachToComponent(
 		Character->GetMesh(),
@@ -107,40 +58,27 @@ void AWeaponBase::SetupWeaponInput(AFPSCharacter* Character, AActor* CurrentWeap
 	switch (CurrentWeapon->GetFireMode())
 	{
 	case Semi:
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AWeaponBase::OnFirePressed);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, Character, &AFPSCharacter::StartFire);
 		break;
 	case Auto:
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AWeaponBase::OnFirePressed);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, Character, &AFPSCharacter::StopFire);
 	}
 }
 
-void AWeaponBase::SetupWeaponVFX(AWeaponBase* CurrentWeapon)
-{
-	if (bHasMuzzle)
-	{
-		OnShoot.AddUObject(this, &AWeaponBase::SpawnMuzzleFlash);
-	}
-}
 
-void AWeaponBase::SetupWeaponAnimations(UWorld* const& World, AFPSCharacter* Character, AWeaponBase* CurrentWeapon)
+void AWeaponBase::PlayWeaponSFX(const UWorld* World)
 {
-	OnShoot.AddUObject(this, &AWeaponBase::PlayFireMontages);
-	OnShoot.AddUObject(this, &AWeaponBase::PlayWeaponSFX);
-}
-
-void AWeaponBase::PlayWeaponSFX()
-{
-	UWorld* const& World = GetWorld();
 	if (FireSound != nullptr)
 	{
 		UGameplayStatics::PlaySoundAtLocation(World, FireSound, GetActorLocation());
 	}
 }
 
-void AWeaponBase::PlayFireMontages()
+void AWeaponBase::PlayFireMontages(AFPSCharacter* OwnerCharacter)
 {
 	if (ArmsFireMontage != nullptr)
 	{
+
 		UAnimInstance* OwnerAnim = OwnerCharacter->GetMesh()->GetAnimInstance();
 		UAnimMontage* CurrentMontageToPlay;
 

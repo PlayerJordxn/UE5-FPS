@@ -34,6 +34,7 @@ void UFPSAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		bIsAiming = GetFPSCharacter()->bIsAiming;
 		bIsSprinting = GetFPSCharacter()->bIsSprinting;
 		bIsShooting = GetFPSCharacter()->bIsShooting;
+		SprintIndex = GetFPSCharacter()->SprintIndex;
 
 	}
 }

@@ -8,6 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "WeaponBase.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AFPSCharacter::AFPSCharacter()
 {
@@ -28,66 +29,76 @@ AFPSCharacter::AFPSCharacter()
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
 }
 
-void AFPSCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	InitalizeWeapon();
+	ToggleInput();
+
+	CurrentPhysicalityState = PhysicalityState::Standing;
+
+	//OnJumpRequested->BindUObject(this, )
+}
+
+void AFPSCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	//Set Current Movement State
+	double Velocity = GetCharacterMovement()->Velocity.Length();
+	float StationaryThreshold = 1.0f;
+
+	if (Velocity > StationaryThreshold)
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-			if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
-			{
-				//Jumping
-				if (bEnableJumping)
-				{
-					EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
-					EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-				}
-
-				//Moving
-				if (bEnableMovement)
-				{
-					EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFPSCharacter::Move);
-				}
-
-				if (bEnableSprinting)
-				{
-					EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AFPSCharacter::StartSprint);
-					EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopSprint);
-				}
-
-				if (bEnableCrouching)
-				{
-					EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AFPSCharacter::StartCrouch);
-					EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopCrouch);
-				}
-
-				//Leaning
-			}
-		}
+		CurrentMovementState = IsSprinting() ? MovementState::Sprinting : MovementState::Moving;
 	}
-
-	InitalizeWeapon();	
+	else
+	{
+		CurrentMovementState = MovementState::Stationary;
+	}
 }
 
 
+void AFPSCharacter::ProcessJump()
+{
+	switch (CurrentPhysicalityState)
+	{
+	case PhysicalityState::Crouching:
+		//Stand
+		break;
+	case PhysicalityState::Standing:
+
+		if (IsSprinting())
+		{
+			ResetSprint();
+			bPressedJump = true;
+		}
+		else
+		{
+			bPressedJump = true;
+		}
+
+		break;
+	case PhysicalityState::Sliding:
+		//Jump
+		//Cancel Slide
+		break;
+	default:
+		break;
+	}
+}
+
 void AFPSCharacter::InitalizeWeapon()
 {
-	if (WeaponSelection != nullptr)
+	AActor* WeaponActor = GetWorld()->SpawnActor(SelectedWeapon);
+	CurrentWeapon = Cast<AWeaponBase>(WeaponActor);
+
+	if (CurrentWeapon != nullptr && SelectedWeapon != nullptr)
 	{
-		AActor* WeaponActor = GetWorld()->SpawnActor(WeaponSelection);
-		CurrentWeapon = Cast<AWeaponBase>(WeaponActor);
-		if (CurrentWeapon != nullptr)
-		{
-			CurrentWeapon->AttachWeapon(this, WeaponActor, CurrentWeapon);
-		}
+		CurrentWeapon->SetupWeaponAttachment(this, WeaponActor);
+		CurrentWeapon->SetupWeaponInput(this, WeaponActor, CurrentWeapon);
+		CurrentWeapon->PlayWeaponUnholsterMontage(this, CurrentWeapon);
 	}
 }
 
@@ -99,6 +110,10 @@ void AFPSCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFPSCharacter::Look);
 
 		//Aiming
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &AFPSCharacter::StartAim);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopAim);
+
+		//Shooting
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &AFPSCharacter::StartAim);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopAim);
 	}
@@ -138,31 +153,192 @@ void AFPSCharacter::Look(const FInputActionValue& Value)
 
 void AFPSCharacter::StartAim(const FInputActionValue& Value)
 {
-	bIsAiming = true;
+	switch (CurrentMovementState)
+	{
+	case MovementState::Stationary:
+		bIsAiming = true;
+		break;
+
+	case MovementState::Moving:
+		bIsAiming = true;
+		break;
+
+	case MovementState::Sprinting:
+		OnSprintEnd();
+		bIsAiming = true;
+		break;
+
+	default:
+		break;
+	}
 }
 
 void AFPSCharacter::StopAim(const FInputActionValue& Value)
 {
 	bIsAiming = false;
 }
-
-void AFPSCharacter::StartSprint(const FInputActionValue& Value)
-{
-	bIsSprinting = true;
-}
-
-void AFPSCharacter::StopSprint(const FInputActionValue& Value)
-{
-	bIsSprinting = false;
-}
-
 void AFPSCharacter::StartCrouch(const FInputActionValue& Value)
 {
-	OnStartCrouch();
+	OnCrouchBegin();
 }
 
 void AFPSCharacter::StopCrouch(const FInputActionValue& Value)
 {
-	OnStopCrouch();
+	OnCrouchFinished();
 }
+
+void AFPSCharacter::StartFire(const FInputActionValue& Value)
+{
+	UWorld* const World = GetWorld();
+
+	if (IsShooting()) return;
+	if (IsSprinting())
+	{
+		bIsSprinting = false;
+	}	
+	else
+	{
+		/* Fire Rate */
+		bIsShooting = true;
+		World->GetTimerManager().SetTimer(CurrentWeapon->FireRateHandle, this, &AFPSCharacter::StopFire, CurrentWeapon->GetFireRate());
+
+		/* Shoot */
+		FHitResult OutHit;
+		FVector CameraLocation;
+		FRotator CameraRotation;
+
+		/* Get Center Screen */
+		GetController()->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+		bool RayHit = World->LineTraceSingleByChannel(OutHit, CameraLocation, CameraLocation + CameraRotation.Vector() * 100000, ECC_Visibility);
+		if (RayHit)
+		{
+			//DrawDebugSphere(World, OutHit.Location, 15.f, 16, FColor::Blue, true);
+		}
+
+		CurrentWeapon->SpawnMuzzleFlash();
+		CurrentWeapon->PlayFireMontages(this);
+		CurrentWeapon->PlayWeaponSFX(World);
+	}
+	
+}
+
+/* End Firing Weapon */
+void AFPSCharacter::StopFire()
+{
+	bIsShooting = false;
+}
+
+void AFPSCharacter::StartJump(const FInputActionValue& Value)
+{
+	OnJumpRequested->Execute(CurrentPhysicalityState);
+}
+
+void AFPSCharacter::StopJump(const FInputActionValue& Value)
+{
+	bPressedJump = false;
+}
+
+/* SPRINTING METHODS */
+
+void AFPSCharacter::StartSprint(const FInputActionValue& Value)
+{
+	switch (CurrentMovementState)
+	{
+	case MovementState::Stationary:
+		OnSprintBegin();
+		break;
+	case MovementState::Moving:
+		OnSprintBegin();
+		break;
+	case MovementState::Sprinting:
+		break;
+	default:
+		break;
+	}
+}
+
+void AFPSCharacter::StopSprint(const FInputActionValue& Value)
+{
+	OnSprintEnd();
+}
+
+void AFPSCharacter::ExecuteSprint()
+{
+	if (CurrentMovementState == MovementState::Stationary) return;
+	bIsSprinting = true;
+	SprintIndex++;
+}
+
+void AFPSCharacter::ResetSprint()
+{
+	UWorld* const World = GetWorld();
+	bIsSprinting = false;
+
+	if (SprintIndex > 1)
+	{
+		bIsSprinting = false;
+		SprintIndex = 0;
+	}
+	else
+	{
+		World->GetTimerManager().SetTimer(SprintHandle, this, &AFPSCharacter::DelaySprintCancel, SprintResetTime);
+	}
+
+}
+
+void AFPSCharacter::DelaySprintCancel()
+{
+	if (!IsSprinting())
+	{
+		SprintIndex = 0;
+	}
+}
+/*INPUT METHODS*/
+
+void AFPSCharacter::ToggleInput()
+{
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
+			{
+				//Jumping
+				if (bEnableJumping)
+				{
+					EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AFPSCharacter::StartJump);
+					EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopJump);
+				}
+
+				//Moving
+				if (bEnableMovement)
+				{
+					EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFPSCharacter::Move);
+				}
+
+				//Sprinting
+				if (bEnableSprinting)
+				{
+					EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AFPSCharacter::StartSprint);
+					EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopSprint);
+				}
+
+				//Crouching
+				if (bEnableCrouching)
+				{
+					EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AFPSCharacter::StartCrouch);
+					EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopCrouch);
+				}
+
+				//Leaning
+			}
+		}
+	}
+
+
+}
+
+
 

@@ -60,4 +60,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
 	bool bIsShooting;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	int32 SprintIndex;
+
+
+
 };

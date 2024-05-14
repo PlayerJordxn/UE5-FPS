@@ -15,10 +15,43 @@ class UAnimMontage;
 class USoundBase;
 class AWeaponBase;
 
+UENUM(BlueprintType)
+enum class PhysicalityState : uint8 {
+
+	Crouching	UMETA(DisplayName = "Crouching"),
+	Standing	UMETA(DisplayName = "Standing"),
+	Sliding		UMETA(DisplayName = "Sliding"),
+};
+
+UENUM(BlueprintType)
+enum class MovementState : uint8 {
+
+	Stationary	UMETA(DisplayName = "Stationary"),
+	Moving		UMETA(DisplayName = "Moving"),
+	Sprinting	UMETA(DisplayName = "Sprinting"),
+	Airborn		UMETA(DisplayName = "Airborn"),
+};
+
+
+DECLARE_DELEGATE_OneParam(FOnActionRequestedSignature, PhysicalityState)
+
 UCLASS(config=Game)
 class AFPSCharacter : public ACharacter
 {
 	GENERATED_BODY()
+
+public:
+	AFPSCharacter();
+
+	virtual void Tick(float DeltaTime) override;
+
+protected:
+
+	virtual void BeginPlay();
+
+protected:
+
+	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -55,14 +88,10 @@ class AFPSCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* CrouchAction;
 
-public:
-	AFPSCharacter();
+	/* Fire Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* FireAction;
 
-	virtual void Tick(float DeltaTime) override;
-
-protected:
-
-	virtual void BeginPlay();
 
 public:
 
@@ -71,22 +100,27 @@ public:
 	USceneComponent* MeshPivot;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
-	TSubclassOf<AWeaponBase> WeaponSelection;
+	TSubclassOf<AWeaponBase> SelectedWeapon;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	AWeaponBase* CurrentWeapon; 
 
-	/* Character properties*/
+	PhysicalityState CurrentPhysicalityState;
+	MovementState CurrentMovementState;
+
+public:
+
+	/* Character States*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	bool bIsAiming;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Weapon)
 	bool bIsSprinting;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	bool bIsShooting;
 	
-	/* Determines what input should be binded */
+	/* Toggles Input Binding */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Input")
 	bool bEnableMovement;
 
@@ -99,9 +133,34 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Input")
 	bool bEnableCrouching;
 
-protected:
+public:
 
-	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	float CrouchSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	float WalkSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	float SprintSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	float TacticalSprintSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	int32 SprintIndex;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	float SprintResetTime;
+
+	FTimerHandle SprintHandle;
+
+private:
+		
+	FOnActionRequestedSignature* OnJumpRequested;
+	FOnActionRequestedSignature* OnSprintRequested;
+
+public:
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -121,17 +180,25 @@ protected:
 	void StartCrouch(const FInputActionValue& Value);
 	void StopCrouch(const FInputActionValue& Value);
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnStartCrouch();
+	void StartFire(const FInputActionValue& Value);
+	void StopFire();
+
+	void StartJump(const FInputActionValue& Value);
+	void StopJump(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnStopCrouch();
+	void OnCrouchBegin();
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnStartJump();
+	void OnCrouchFinished();
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnStopJump();
+	void OnSprintBegin();	
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnSprintEnd();
+
+
 public:
 
 	/** Returns FirstPersonCameraComponent subobject **/
@@ -142,6 +209,26 @@ public:
 	
 private:
 
+	UFUNCTION()
+	void ProcessJump();
+
+	UFUNCTION()
 	void InitalizeWeapon();
+
+	UFUNCTION()
+	void ToggleInput();
+
+	UFUNCTION(BlueprintCallable)
+	void ExecuteSprint();
+
+	UFUNCTION(BlueprintCallable)
+	void ResetSprint();
+
+	UFUNCTION()
+	void DelaySprintCancel();
+
+	protected:
+	
+	class USoundCue*
 };
 

@@ -32,9 +32,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Input")
 	class UInputAction* FireAction;
 
-	/* Character Holding Weapon */
-	class AFPSCharacter* OwnerCharacter;
-
 	// Sets default values for this actor's properties
 	AWeaponBase();
 
@@ -85,35 +82,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Data")
 	class UDataAsset* MuzzleData;
 
-	FOnShootSignature OnShoot;
-
 	EFireMode GetFireMode() const { return FireMode; }
 	float GetFireRate() const { return .02f; }
 	float GetClassicPoseValue() const { return 0.f; }
 	float GetAimRate() const { return .2f; }
 
 
-	UFUNCTION()
-	void AttachWeapon(class AFPSCharacter* Character, AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon);
-
 	void PlayWeaponUnholsterMontage(AFPSCharacter* Character, AWeaponBase* CurrentWeapon);
 
-	void SetupWeaponAttachment(AActor* CurrentWeaponActor, AFPSCharacter* Character);
+	void SetupWeaponAttachment(AFPSCharacter* Character, AActor* CurrentWeaponActor);
 
 	UFUNCTION()
 	void SetupWeaponInput(AFPSCharacter* Character, AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon);
-	
-	UFUNCTION()
-	void SetupWeaponVFX(AWeaponBase* CurrentWeapon);
-
-	UFUNCTION()
-	void SetupWeaponAnimations(UWorld* const& World, AFPSCharacter* Character, AWeaponBase* CurrentWeapon);
-
-	UFUNCTION()
-	void OnFirePressed();
-
-	UFUNCTION()
-	void OnFireRelased();
 
 	/* Visuals */
 
@@ -145,15 +125,15 @@ public:
 	FTimerHandle WeaponSwayHandle;
 
 
-private:
+public:
 
 	/* Fire Actions */
 
 	UFUNCTION()
-	void PlayWeaponSFX();
+	void PlayWeaponSFX(const UWorld* World);
 
 	UFUNCTION()
-	void PlayFireMontages();
+	void PlayFireMontages(AFPSCharacter* OwnerCharacter);
 
 	UFUNCTION()
 	void SpawnMuzzleFlash();
