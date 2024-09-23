@@ -92,6 +92,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* FireAction;
 
+	/* Fire Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* ShootAction;
+
 
 public:
 
@@ -227,8 +231,8 @@ private:
 	UFUNCTION()
 	void DelaySprintCancel();
 
-	protected:
 	
-	class USoundCue*
+	
+	//class USoundCue*
 };
 

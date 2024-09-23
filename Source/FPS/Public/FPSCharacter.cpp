@@ -114,8 +114,8 @@ void AFPSCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopAim);
 
 		//Shooting
-		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &AFPSCharacter::StartAim);
-		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopAim);
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &AFPSCharacter::StartFire);
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopFire);
 	}
 }
 
@@ -216,7 +216,7 @@ void AFPSCharacter::StartFire(const FInputActionValue& Value)
 			//DrawDebugSphere(World, OutHit.Location, 15.f, 16, FColor::Blue, true);
 		}
 
-		CurrentWeapon->SpawnMuzzleFlash();
+		//CurrentWeapon->SpawnMuzzleFlash();
 		CurrentWeapon->PlayFireMontages(this);
 		CurrentWeapon->PlayWeaponSFX(World);
 	}
