@@ -68,6 +68,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
 	UStaticMeshComponent* LaserBeamMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MeshComponents)
+	UStaticMeshComponent* MagazineReserveMesh;
+
 public:
 
 	UPROPERTY(EditAnywhere)

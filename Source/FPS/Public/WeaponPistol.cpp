@@ -29,6 +29,9 @@ AWeaponPistol::AWeaponPistol()
 
 	GripMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Grip Mesh"));
 	GripMesh->SetupAttachment(BarrelMesh, "SOCKET_Grip");
+
+	MagazineReserveMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Magazine Reserve Mesh"));
+	MagazineReserveMesh->SetupAttachment(WeaponBody, "SOCKET_Magazine_Reserve");
 }
 
 

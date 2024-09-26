@@ -34,7 +34,12 @@ void UFPSAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		bIsAiming = GetFPSCharacter()->bIsAiming;
 		bIsSprinting = GetFPSCharacter()->bIsSprinting;
 		bIsShooting = GetFPSCharacter()->bIsShooting;
-		SprintIndex = GetFPSCharacter()->SprintIndex;
+		bIsCrouching = GetFPSCharacter()->bIsCrouching;
+
+		float MovingThreshold = 0.01f;
+		bIsMovingForward = GetFPSCharacter()->GetVelocity().X > MovingThreshold ? true : false;
+		bIsMovingStrafe = GetFPSCharacter()->GetVelocity().Y > MovingThreshold ? true : false;
+		bIsMovingBackward = GetFPSCharacter()->GetVelocity().Z > MovingThreshold ? true : false;
 
 	}
 }

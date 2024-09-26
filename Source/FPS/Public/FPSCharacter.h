@@ -20,7 +20,6 @@ enum class PhysicalityState : uint8 {
 
 	Crouching	UMETA(DisplayName = "Crouching"),
 	Standing	UMETA(DisplayName = "Standing"),
-	Sliding		UMETA(DisplayName = "Sliding"),
 };
 
 UENUM(BlueprintType)
@@ -96,6 +95,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* ShootAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* ReloadAction;
+
 
 public:
 
@@ -109,20 +111,23 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	AWeaponBase* CurrentWeapon; 
 
-	PhysicalityState CurrentPhysicalityState;
-	MovementState CurrentMovementState;
+	//PhysicalityState CurrentPhysicalityState;
+	//MovementState CurrentMovementState;
 
 public:
 
 	/* Character States*/
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool bIsAiming;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Weapon)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool bIsSprinting;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool bIsShooting;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool bIsCrouching;
 	
 	/* Toggles Input Binding */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Input")
@@ -148,21 +153,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float SprintSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
-	float TacticalSprintSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera Properties")
+	float SprintFOV;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	int32 SprintIndex;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
-	float SprintResetTime;
-
-	FTimerHandle SprintHandle;
-
-private:
-		
-	FOnActionRequestedSignature* OnJumpRequested;
-	FOnActionRequestedSignature* OnSprintRequested;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera Properties")
+	float DefaultFOV;
 
 public:
 
@@ -190,6 +185,8 @@ public:
 	void StartJump(const FInputActionValue& Value);
 	void StopJump(const FInputActionValue& Value);
 
+	void StartReload(const FInputActionValue& Value);
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnCrouchBegin();
 
@@ -214,25 +211,11 @@ public:
 private:
 
 	UFUNCTION()
-	void ProcessJump();
-
-	UFUNCTION()
 	void InitalizeWeapon();
 
 	UFUNCTION()
 	void ToggleInput();
 
-	UFUNCTION(BlueprintCallable)
-	void ExecuteSprint();
 
-	UFUNCTION(BlueprintCallable)
-	void ResetSprint();
-
-	UFUNCTION()
-	void DelaySprintCancel();
-
-	
-	
-	//class USoundCue*
 };
 

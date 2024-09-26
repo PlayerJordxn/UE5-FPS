@@ -35,58 +35,11 @@ void AFPSCharacter::BeginPlay()
 
 	InitalizeWeapon();
 	ToggleInput();
-
-	CurrentPhysicalityState = PhysicalityState::Standing;
-
-	//OnJumpRequested->BindUObject(this, )
 }
 
 void AFPSCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	//Set Current Movement State
-	double Velocity = GetCharacterMovement()->Velocity.Length();
-	float StationaryThreshold = 1.0f;
-
-	if (Velocity > StationaryThreshold)
-	{
-		CurrentMovementState = IsSprinting() ? MovementState::Sprinting : MovementState::Moving;
-	}
-	else
-	{
-		CurrentMovementState = MovementState::Stationary;
-	}
-}
-
-
-void AFPSCharacter::ProcessJump()
-{
-	switch (CurrentPhysicalityState)
-	{
-	case PhysicalityState::Crouching:
-		//Stand
-		break;
-	case PhysicalityState::Standing:
-
-		if (IsSprinting())
-		{
-			ResetSprint();
-			bPressedJump = true;
-		}
-		else
-		{
-			bPressedJump = true;
-		}
-
-		break;
-	case PhysicalityState::Sliding:
-		//Jump
-		//Cancel Slide
-		break;
-	default:
-		break;
-	}
 }
 
 void AFPSCharacter::InitalizeWeapon()
@@ -153,24 +106,7 @@ void AFPSCharacter::Look(const FInputActionValue& Value)
 
 void AFPSCharacter::StartAim(const FInputActionValue& Value)
 {
-	switch (CurrentMovementState)
-	{
-	case MovementState::Stationary:
-		bIsAiming = true;
-		break;
-
-	case MovementState::Moving:
-		bIsAiming = true;
-		break;
-
-	case MovementState::Sprinting:
-		OnSprintEnd();
-		bIsAiming = true;
-		break;
-
-	default:
-		break;
-	}
+	bIsAiming = true;
 }
 
 void AFPSCharacter::StopAim(const FInputActionValue& Value)
@@ -179,11 +115,16 @@ void AFPSCharacter::StopAim(const FInputActionValue& Value)
 }
 void AFPSCharacter::StartCrouch(const FInputActionValue& Value)
 {
+	if (bIsSprinting) bIsSprinting = false;
+
 	OnCrouchBegin();
+	bIsCrouched = true;
+
 }
 
 void AFPSCharacter::StopCrouch(const FInputActionValue& Value)
 {
+	bIsCrouched = false;
 	OnCrouchFinished();
 }
 
@@ -191,47 +132,49 @@ void AFPSCharacter::StartFire(const FInputActionValue& Value)
 {
 	UWorld* const World = GetWorld();
 
-	if (IsShooting()) return;
-	if (IsSprinting())
-	{
-		bIsSprinting = false;
-	}	
-	else
-	{
-		/* Fire Rate */
-		bIsShooting = true;
-		World->GetTimerManager().SetTimer(CurrentWeapon->FireRateHandle, this, &AFPSCharacter::StopFire, CurrentWeapon->GetFireRate());
+	//if (IsShooting()) return;
+	//if (IsSprinting())
+	//{
+	//	OnSprintEnd();
+	//	bIsSprinting = false;
+	//}	
+	//else
+	//{
+	//	/* Fire Rate */
+	//	bIsShooting = true;
+	//	World->GetTimerManager().SetTimer(CurrentWeapon->FireRateHandle, this, &AFPSCharacter::StopFire, CurrentWeapon->GetFireRate());
 
-		/* Shoot */
-		FHitResult OutHit;
-		FVector CameraLocation;
-		FRotator CameraRotation;
+	//	/* Shoot */
+	//	FHitResult OutHit;
+	//	FVector CameraLocation;
+	//	FRotator CameraRotation;
 
-		/* Get Center Screen */
-		GetController()->GetPlayerViewPoint(CameraLocation, CameraRotation);
+	//	/* Get Center Screen */
+	//	GetController()->GetPlayerViewPoint(CameraLocation, CameraRotation);
 
-		bool RayHit = World->LineTraceSingleByChannel(OutHit, CameraLocation, CameraLocation + CameraRotation.Vector() * 100000, ECC_Visibility);
-		if (RayHit)
-		{
-			//DrawDebugSphere(World, OutHit.Location, 15.f, 16, FColor::Blue, true);
-		}
+	//	bool RayHit = World->LineTraceSingleByChannel(OutHit, CameraLocation, CameraLocation + CameraRotation.Vector() * 100000, ECC_Visibility);
+	//	if (RayHit)
+	//	{
+	//		//DrawDebugSphere(World, OutHit.Location, 15.f, 16, FColor::Blue, true);
+	//	}
 
-		//CurrentWeapon->SpawnMuzzleFlash();
-		CurrentWeapon->PlayFireMontages(this);
-		CurrentWeapon->PlayWeaponSFX(World);
-	}
+	//	//CurrentWeapon->SpawnMuzzleFlash();
+	//	CurrentWeapon->PlayFireMontages(this);
+	//	CurrentWeapon->PlayWeaponSFX(World);
+	//}
 	
 }
 
 /* End Firing Weapon */
 void AFPSCharacter::StopFire()
 {
-	bIsShooting = false;
+	
 }
 
 void AFPSCharacter::StartJump(const FInputActionValue& Value)
 {
-	OnJumpRequested->Execute(CurrentPhysicalityState);
+	bPressedJump = true;
+	OnSprintEnd();
 }
 
 void AFPSCharacter::StopJump(const FInputActionValue& Value)
@@ -239,23 +182,12 @@ void AFPSCharacter::StopJump(const FInputActionValue& Value)
 	bPressedJump = false;
 }
 
-/* SPRINTING METHODS */
-
 void AFPSCharacter::StartSprint(const FInputActionValue& Value)
 {
-	switch (CurrentMovementState)
-	{
-	case MovementState::Stationary:
-		OnSprintBegin();
-		break;
-	case MovementState::Moving:
-		OnSprintBegin();
-		break;
-	case MovementState::Sprinting:
-		break;
-	default:
-		break;
-	}
+	bool bIsGrounded = GetCharacterMovement()->IsMovingOnGround();
+	if (!bIsGrounded) return;
+	if (bIsCrouched) return;
+	OnSprintBegin();
 }
 
 void AFPSCharacter::StopSprint(const FInputActionValue& Value)
@@ -263,37 +195,11 @@ void AFPSCharacter::StopSprint(const FInputActionValue& Value)
 	OnSprintEnd();
 }
 
-void AFPSCharacter::ExecuteSprint()
+void AFPSCharacter::StartReload(const FInputActionValue& Value)
 {
-	if (CurrentMovementState == MovementState::Stationary) return;
-	bIsSprinting = true;
-	SprintIndex++;
+	
 }
 
-void AFPSCharacter::ResetSprint()
-{
-	UWorld* const World = GetWorld();
-	bIsSprinting = false;
-
-	if (SprintIndex > 1)
-	{
-		bIsSprinting = false;
-		SprintIndex = 0;
-	}
-	else
-	{
-		World->GetTimerManager().SetTimer(SprintHandle, this, &AFPSCharacter::DelaySprintCancel, SprintResetTime);
-	}
-
-}
-
-void AFPSCharacter::DelaySprintCancel()
-{
-	if (!IsSprinting())
-	{
-		SprintIndex = 0;
-	}
-}
 /*INPUT METHODS*/
 
 void AFPSCharacter::ToggleInput()
