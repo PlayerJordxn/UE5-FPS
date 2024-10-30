@@ -16,9 +16,14 @@ AFPSCharacter::AFPSCharacter()
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 		
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
+	LeanPivot = CreateDefaultSubobject<USceneComponent>(TEXT("Lean Pivot"));
+	LeanPivot->SetupAttachment(GetCapsuleComponent());
+	LeanPivot->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+
 	// Create a CameraComponent	
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
+	FirstPersonCameraComponent->SetupAttachment(LeanPivot);
 	FirstPersonCameraComponent->bUsePawnControlRotation = false;
 
 	MeshPivot = CreateDefaultSubobject<USceneComponent>(TEXT("Mesh Pivot"));
@@ -69,6 +74,9 @@ void AFPSCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 		//Shooting
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &AFPSCharacter::StartFire);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopFire);
+
+		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &AFPSCharacter::StartReload);
+
 	}
 }
 
@@ -92,7 +100,7 @@ void AFPSCharacter::Move(const FInputActionValue& Value)
 void AFPSCharacter::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
+	FVector2D LookAxisVector = Value.Get<FVector2D>() * SensitivityMultiplier;
 
 	if (Controller != nullptr)
 	{
@@ -106,69 +114,78 @@ void AFPSCharacter::Look(const FInputActionValue& Value)
 
 void AFPSCharacter::StartAim(const FInputActionValue& Value)
 {
-	bIsAiming = true;
+	OnAimStart();
 }
 
 void AFPSCharacter::StopAim(const FInputActionValue& Value)
 {
-	bIsAiming = false;
+	OnAimEnd();
 }
 void AFPSCharacter::StartCrouch(const FInputActionValue& Value)
 {
-	if (bIsSprinting) bIsSprinting = false;
-
 	OnCrouchBegin();
-	bIsCrouched = true;
-
 }
 
 void AFPSCharacter::StopCrouch(const FInputActionValue& Value)
 {
-	bIsCrouched = false;
 	OnCrouchFinished();
 }
 
 void AFPSCharacter::StartFire(const FInputActionValue& Value)
 {
+
+	if (bIsReloading) return;
+	if (IsShooting()) return;
+
 	UWorld* const World = GetWorld();
 
-	//if (IsShooting()) return;
-	//if (IsSprinting())
-	//{
-	//	OnSprintEnd();
-	//	bIsSprinting = false;
-	//}	
-	//else
-	//{
-	//	/* Fire Rate */
-	//	bIsShooting = true;
-	//	World->GetTimerManager().SetTimer(CurrentWeapon->FireRateHandle, this, &AFPSCharacter::StopFire, CurrentWeapon->GetFireRate());
 
-	//	/* Shoot */
-	//	FHitResult OutHit;
-	//	FVector CameraLocation;
-	//	FRotator CameraRotation;
-
-	//	/* Get Center Screen */
-	//	GetController()->GetPlayerViewPoint(CameraLocation, CameraRotation);
-
-	//	bool RayHit = World->LineTraceSingleByChannel(OutHit, CameraLocation, CameraLocation + CameraRotation.Vector() * 100000, ECC_Visibility);
-	//	if (RayHit)
-	//	{
-	//		//DrawDebugSphere(World, OutHit.Location, 15.f, 16, FColor::Blue, true);
-	//	}
-
-	//	//CurrentWeapon->SpawnMuzzleFlash();
-	//	CurrentWeapon->PlayFireMontages(this);
-	//	CurrentWeapon->PlayWeaponSFX(World);
-	//}
+	if (IsSprinting())
+	{
+		OnSprintEnd();
+		bIsShooting = true;
+		World->GetTimerManager().SetTimer(CurrentWeapon->ShootDelayHandle, this, &AFPSCharacter::ShootRay, CurrentWeapon->GetShootDelay());
+		World->GetTimerManager().SetTimer(CurrentWeapon->FireRateHandle, this, &AFPSCharacter::StopFire, CurrentWeapon->GetFireRate());
+	}
+	else
+	{
+		/* Fire Rate */
+		bIsShooting = true;
+		World->GetTimerManager().SetTimer(CurrentWeapon->FireRateHandle, this, &AFPSCharacter::StopFire, CurrentWeapon->GetFireRate());
+		ShootRay();
+	}
 	
+}
+
+void AFPSCharacter::ShootRay()
+{
+	UWorld* const World = GetWorld();
+
+
+	/* Shoot */
+	FHitResult OutHit;
+	FVector CameraLocation;
+	FRotator CameraRotation;
+
+	//Get Center Screen 
+	GetController()->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+	bool RayHit = World->LineTraceSingleByChannel(OutHit, CameraLocation, CameraLocation + CameraRotation.Vector() * 100000, ECC_Visibility);
+	if (RayHit)
+	{
+		DrawDebugSphere(World, OutHit.Location, 15.f, 16, FColor::Blue, true);
+	}
+
+
+	//CurrentWeapon->SpawnMuzzleFlash();
+	CurrentWeapon->PlayFireMontages(this);
+	CurrentWeapon->PlayWeaponSFX(World);
 }
 
 /* End Firing Weapon */
 void AFPSCharacter::StopFire()
 {
-	
+	bIsShooting = false;
 }
 
 void AFPSCharacter::StartJump(const FInputActionValue& Value)
@@ -182,11 +199,28 @@ void AFPSCharacter::StopJump(const FInputActionValue& Value)
 	bPressedJump = false;
 }
 
+void AFPSCharacter::StartLeanLeft(const FInputActionValue& Value)
+{
+	OnLeanLeftBegin();
+}
+
+void AFPSCharacter::StartLeanRight(const FInputActionValue& Value)
+{
+	OnLeanRightBegin();
+}
+
+void AFPSCharacter::StopLeanLeft(const FInputActionValue& Value)
+{
+	OnLeanLeftFinished();
+}
+
+void AFPSCharacter::StopLeanRight(const FInputActionValue& Value)
+{
+	OnLeanRightFinished();
+}
+
 void AFPSCharacter::StartSprint(const FInputActionValue& Value)
 {
-	bool bIsGrounded = GetCharacterMovement()->IsMovingOnGround();
-	if (!bIsGrounded) return;
-	if (bIsCrouched) return;
 	OnSprintBegin();
 }
 
@@ -197,7 +231,8 @@ void AFPSCharacter::StopSprint(const FInputActionValue& Value)
 
 void AFPSCharacter::StartReload(const FInputActionValue& Value)
 {
-	
+	if (bIsReloading) return;
+	OnReloadStart();
 }
 
 /*INPUT METHODS*/
@@ -239,6 +274,15 @@ void AFPSCharacter::ToggleInput()
 				}
 
 				//Leaning
+				if (bEnableLeaning)
+				{
+					EnhancedInputComponent->BindAction(LeanLeftAction, ETriggerEvent::Started, this, &AFPSCharacter::StartLeanLeft);
+					EnhancedInputComponent->BindAction(LeanRightAction, ETriggerEvent::Started, this, &AFPSCharacter::StartLeanRight);
+
+					EnhancedInputComponent->BindAction(LeanLeftAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopLeanLeft);
+					EnhancedInputComponent->BindAction(LeanRightAction, ETriggerEvent::Completed, this, &AFPSCharacter::StopLeanRight);
+				}
+
 			}
 		}
 	}

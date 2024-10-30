@@ -76,7 +76,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool bHasMuzzle;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Statistics")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
 	TEnumAsByte<EFireMode> FireMode;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Data")
@@ -85,18 +85,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Data")
 	class UDataAsset* MuzzleData;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
+	float FireRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
+	float ClassicPoseValue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
+	float AimRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
+	float ShootDelay;
+
 	EFireMode GetFireMode() const { return FireMode; }
-	float GetFireRate() const { return .02f; }
-	float GetClassicPoseValue() const { return 0.f; }
-	float GetAimRate() const { return .2f; }
-
-
-	void PlayWeaponUnholsterMontage(AFPSCharacter* Character, AWeaponBase* CurrentWeapon);
-
-	void SetupWeaponAttachment(AFPSCharacter* Character, AActor* CurrentWeaponActor);
-
-	UFUNCTION()
-	void SetupWeaponInput(AFPSCharacter* Character, AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon);
+	float GetFireRate() const { return FireRate; }
+	float GetClassicPoseValue() const { return ClassicPoseValue; }
+	float GetAimRate() const { return AimRate; }
+	float GetShootDelay() const { return ShootDelay; }
 
 	/* Visuals */
 
@@ -125,7 +130,7 @@ public:
 
 	/* Fire Handle */
 	FTimerHandle FireRateHandle;
-	FTimerHandle WeaponSwayHandle;
+	FTimerHandle ShootDelayHandle;
 
 
 public:
@@ -140,4 +145,14 @@ public:
 
 	UFUNCTION()
 	void SpawnMuzzleFlash();
+
+	UFUNCTION()
+	void PlayWeaponUnholsterMontage(AFPSCharacter* Character, AWeaponBase* CurrentWeapon);
+
+	UFUNCTION()
+	void SetupWeaponAttachment(AFPSCharacter* Character, AActor* CurrentWeaponActor);
+
+	UFUNCTION()
+	void SetupWeaponInput(AFPSCharacter* Character, AActor* CurrentWeaponActor, AWeaponBase* CurrentWeapon);
+
 };

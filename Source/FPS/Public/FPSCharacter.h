@@ -98,6 +98,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* ReloadAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* LeanLeftAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* LeanRightAction;
+
 
 public:
 
@@ -105,14 +111,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	USceneComponent* MeshPivot;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
+	USceneComponent* LeanPivot;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
 	TSubclassOf<AWeaponBase> SelectedWeapon;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	AWeaponBase* CurrentWeapon; 
-
-	//PhysicalityState CurrentPhysicalityState;
-	//MovementState CurrentMovementState;
 
 public:
 
@@ -128,6 +134,18 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool bIsCrouching;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool bIsReloading;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool bDisableSprint;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool bIsLeaningLeft;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool bIsLeaningRight;
 	
 	/* Toggles Input Binding */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Input")
@@ -141,6 +159,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Input")
 	bool bEnableCrouching;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Toggle Input")
+	bool bEnableLeaning;
 
 public:
 
@@ -158,6 +179,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera Properties")
 	float DefaultFOV;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mouse Properties")
+	float SensitivityMultiplier;
 
 public:
 
@@ -180,10 +204,17 @@ public:
 	void StopCrouch(const FInputActionValue& Value);
 
 	void StartFire(const FInputActionValue& Value);
+	void ShootRay();
 	void StopFire();
 
 	void StartJump(const FInputActionValue& Value);
 	void StopJump(const FInputActionValue& Value);
+
+	void StartLeanLeft(const FInputActionValue& Value);
+	void StartLeanRight(const FInputActionValue& Value);
+
+	void StopLeanLeft(const FInputActionValue& Value);
+	void StopLeanRight(const FInputActionValue& Value);
 
 	void StartReload(const FInputActionValue& Value);
 
@@ -198,6 +229,28 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnSprintEnd();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnReloadStart();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnAimStart();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnAimEnd();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnLeanLeftBegin();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnLeanRightBegin();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnLeanLeftFinished();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnLeanRightFinished();
+
 
 
 public:
