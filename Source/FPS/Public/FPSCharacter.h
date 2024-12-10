@@ -15,6 +15,7 @@ class UAnimMontage;
 class USoundBase;
 class AWeaponBase;
 
+
 UENUM(BlueprintType)
 enum class PhysicalityState : uint8 {
 
@@ -269,6 +270,8 @@ private:
 	UFUNCTION()
 	void ToggleInput();
 
+	UFUNCTION()
+	void AnimNotify_SetMagazineVisibility(bool bIsVisible);
 
 };
 

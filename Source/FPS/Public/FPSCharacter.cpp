@@ -290,5 +290,10 @@ void AFPSCharacter::ToggleInput()
 
 }
 
+void AFPSCharacter::AnimNotify_SetMagazineVisibility(bool bIsVisible)
+{
+	return;
+}
+
 
 
